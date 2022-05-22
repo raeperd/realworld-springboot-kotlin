@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
     id("org.sonarqube") version "3.3"
+    id("com.google.cloud.tools.jib") version "3.2.1"
 }
 
 group = "io.github.raeperd"
@@ -40,5 +41,21 @@ sonarqube {
         property("sonar.projectKey", "raeperd_realworld-springboot-kotlin")
         property("sonar.organization", "raeperd")
         property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
+
+jib {
+    from {
+        image = "amazoncorretto:17"
+        platforms {
+            platform {
+                architecture = "amd64"
+                os = "linux"
+            }
+            platform {
+                architecture = "arm64"
+                os = "linux"
+            }
+        }
     }
 }
