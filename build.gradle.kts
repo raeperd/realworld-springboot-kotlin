@@ -5,6 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
+    id("org.sonarqube") version "3.3"
 }
 
 group = "io.github.raeperd"
@@ -32,4 +33,12 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "raeperd_realworld-springboot-kotlin")
+        property("sonar.organization", "raeperd")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
