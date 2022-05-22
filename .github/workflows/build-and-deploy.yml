@@ -45,11 +45,13 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
             type=sha
+          sep-tags: ','
       - id: docker
         run: |
           echo "::echo::on"
           echo "::set-output name=image::${{ env.IMAGE_NAME }}}"
           echo "::set-output name=tags::$(echo ${{ steps.metadata.outputs.tags}} | sed "s#${{ env.IMAGE_NAME }}##g" )"
-      - run: ./gradlew jib \
-          -Djib.to.image=${{ steps.docker.output.image }} \
-          -Djib.to.tags=${{ steps.docker.output.tags }}
+      - run: |
+          ./gradlew jib \
+            -Djib.to.image=${{ steps.docker.output.image }} \
+            -Djib.to.tags=${{ steps.docker.output.tags }}
