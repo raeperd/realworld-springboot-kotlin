@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.UserRegistrationForm
+import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,9 +15,11 @@ class UserRepositoryTest(
 ) {
     @Test
     fun `when save user expect return user with id`() {
-        val form = UserRegistrationForm("user@email.com", "username", "")
+        val email = "user@email.com"
+        val username = "username"
+        val password = Password("password")
 
-        val userSaved = userRepository.saveNewUser(form)
+        val userSaved = userRepository.saveNewUser(email, username, password)
 
         assertThat(userSaved.id).isNotNull
     }
