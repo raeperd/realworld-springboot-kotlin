@@ -12,7 +12,8 @@ class UserEntity(
     override var id: Long?,
     override var email: String,
     override var username: String,
+    override val password: String,
     override var image: String,
-    override var bio: String
+    override var bio: String,
 ) : User {
 }

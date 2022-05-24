@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +33,7 @@ class AuthIntegrationTest(
             content {
                 jsonPath("user.email", equalTo(email))
                 jsonPath("user.username", equalTo(username))
-                jsonPath("user.token", not(emptyString()))
+                jsonPath("user.token", emptyString())
                 jsonPath("user.bio", emptyString())
                 jsonPath("user.image", nullValue())
             }
