@@ -20,7 +20,7 @@ class UserJpaRepository(
             id = null,
             email = email,
             username = username,
-            hashedPassword = password.hashedPassword,
+            password = password,
             bio = "",
             image = ""
         )

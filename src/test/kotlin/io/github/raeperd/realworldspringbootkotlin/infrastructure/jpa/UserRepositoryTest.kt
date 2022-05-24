@@ -17,12 +17,10 @@ class UserRepositoryTest(
     fun `when save user expect return user with id`() {
         val email = "user@email.com"
         val username = "username"
-        val password = PasswordImpl("password")
+        val password = Password("password")
 
         val userSaved = userRepository.saveNewUser(email, username, password)
 
         assertThat(userSaved.id).isNotNull
     }
-
-    private class PasswordImpl(override val hashedPassword: String) : Password
 }

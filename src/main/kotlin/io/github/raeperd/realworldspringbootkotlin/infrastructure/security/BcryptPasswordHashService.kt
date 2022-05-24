@@ -10,11 +10,6 @@ class BcryptPasswordHashService(
 
     override fun hash(rawPassword: String): Password {
         return bCryptPasswordEncoder.encode(rawPassword)
-            .let { password -> BcryptPassword(password) }
+            .let { password -> Password(password) }
     }
-
-    @JvmInline
-    private value class BcryptPassword(
-        override val hashedPassword: String
-    ) : Password
 }
