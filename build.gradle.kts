@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.spring") version "1.6.21"
     id("org.sonarqube") version "3.3"
     id("com.google.cloud.tools.jib") version "3.2.1"
+    jacoco
 }
 
 group = "io.github.raeperd"
@@ -34,6 +35,23 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "PACKAGE"
+
+            limit {
+                value = "COVEREDRATIO"
+                minimum = "0.90".toBigDecimal()
+            }
+
+            excludes = listOf("io.github.raeperd.realworldspringbootkotlin")
+        }
+    }
 }
 
 sonarqube {
