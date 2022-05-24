@@ -2,7 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin.web
 
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRegistrationForm
-import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
+import io.github.raeperd.realworldspringbootkotlin.domain.UserService
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class UserRestController(private val userRepository: UserRepository) {
+class UserRestController(private val userService: UserService) {
 
     @ResponseStatus(CREATED)
     @PostMapping("/users")
     fun postUsers(@RequestBody dto: UserPostDTO): UserDTO {
         return dto.toUserRegistrationForm()
-            .let { form -> userRepository.saveNewUser(form) }
+            .let { form -> userService.registerUser(form) }
             .toUserDTO()
     }
 

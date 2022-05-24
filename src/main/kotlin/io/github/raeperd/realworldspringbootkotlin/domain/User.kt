@@ -4,13 +4,13 @@ interface User {
     val id: Long?
     val email: String
     val username: String
-    val password: String
+    val password: Password
     val image: String
     val bio: String
 }
 
 interface UserRepository {
-    fun saveNewUser(form: UserRegistrationForm): User
+    fun saveNewUser(email: String, username: String, password: Password): User
 }
 
 data class UserRegistrationForm(
