@@ -5,6 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
+    kotlin("plugin.allopen") version "1.6.21"
+    id("org.jetbrains.kotlin.plugin.jpa") version "1.6.21"
     id("org.sonarqube") version "3.3"
     id("com.google.cloud.tools.jib") version "3.2.1"
     jacoco
@@ -20,10 +22,18 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2")
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
 }
 
 tasks.withType<KotlinCompile> {
@@ -53,7 +63,7 @@ tasks.jacocoTestCoverageVerification {
 
             limit {
                 value = "COVEREDRATIO"
-                minimum = "0.90".toBigDecimal()
+                minimum = "0.60".toBigDecimal()
             }
 
             excludes = listOf("io.github.raeperd.realworldspringbootkotlin")
