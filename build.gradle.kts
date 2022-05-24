@@ -39,6 +39,13 @@ tasks.withType<Test> {
     finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
