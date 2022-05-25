@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTSerializer
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRegistrationForm
 import io.github.raeperd.realworldspringbootkotlin.domain.UserService
@@ -10,7 +11,10 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class UserRestController(private val userService: UserService) {
+class UserRestController(
+    private val userService: UserService,
+    private val jwtSerializer: JWTSerializer
+) {
 
     @ResponseStatus(CREATED)
     @PostMapping("/users")
@@ -24,7 +28,7 @@ class UserRestController(private val userService: UserService) {
         return UserDTO(
             email = email,
             username = username,
-            token = "",
+            token = jwtSerializer.serialize(this),
             image = null,
             bio = bio
         )
