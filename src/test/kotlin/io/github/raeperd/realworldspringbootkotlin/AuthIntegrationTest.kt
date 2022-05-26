@@ -13,24 +13,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
+import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.post
+import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
 class AuthIntegrationTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val mapper: ObjectMapper
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val mapper: ObjectMapper
 ) {
+    @Transactional
     @Test
     fun `when post users expect valid json response`() {
         val email = "user@email.com"
         val username = "username"
 
-        mockMvc.post("/users") {
-            contentType = APPLICATION_JSON
-            content = mapper.writeValueAsString(UserPostDTO(email, "password", username))
-            accept = APPLICATION_JSON
-        }.andExpect {
+        mockMvc.postUsers(email, "password", username).andExpect {
             status { isCreated() }
             content {
                 jsonPath("user.email", equalTo(email))
@@ -50,9 +50,40 @@ class AuthIntegrationTest(
             accept = APPLICATION_JSON
         }.andExpect {
             status { isNotFound() }
-            content {
-                jsonPath("errors.body", not(emptyList<String>()))
-            }
+            content { notEmptyErrorResponse() }
         }
+    }
+
+    @Transactional
+    @Test
+    fun `when login with invalid password expect badRequest status`() {
+        val email = "user@email.com"
+        mockMvc.postUsers(email, "password", "username")
+
+        mockMvc.postUsersLogin(email, "password-different")
+            .andExpect {
+                status { isBadRequest() }
+                content { notEmptyErrorResponse() }
+            }
+    }
+
+    private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
+        return post("/users") {
+            contentType = APPLICATION_JSON
+            content = mapper.writeValueAsString(UserPostDTO(email, password, username))
+            accept = APPLICATION_JSON
+        }
+    }
+
+    private fun MockMvc.postUsersLogin(email: String, password: String): ResultActionsDsl {
+        return post("/users/login") {
+            contentType = APPLICATION_JSON
+            content = mapper.writeValueAsString(UserLoginDTO(email, password))
+            accept = APPLICATION_JSON
+        }
+    }
+
+    private fun MockMvcResultMatchersDsl.notEmptyErrorResponse() {
+        return jsonPath("errors.body", not(emptyList<String>()))
     }
 }
