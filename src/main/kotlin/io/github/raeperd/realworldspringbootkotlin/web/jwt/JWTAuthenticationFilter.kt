@@ -36,6 +36,7 @@ class JWTAuthenticationFilter(
     ) {
         try {
             val jwt = request.getHeaderOrThrow(AUTHORIZATION)
+                .run { substringAfter("Token ") }
             val payload = jwtDeserializer.deserialize(jwt)
             request.setAttribute(JWT_PAYLOAD_ATTRIBUTE_NAME, payload)
         } catch (exception: NoSuchElementException) {

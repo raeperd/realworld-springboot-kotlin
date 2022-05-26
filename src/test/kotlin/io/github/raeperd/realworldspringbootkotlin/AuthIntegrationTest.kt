@@ -92,7 +92,7 @@ class AuthIntegrationTest(
         val token = mockMvc.postUsers(email, "password", username)
             .andReturnUserToken()
 
-        mockMvc.get("/user") { header(AUTHORIZATION, token) }
+        mockMvc.get("/user") { header(AUTHORIZATION, "Token $token") }
             .andExpect {
                 status { isOk() }
                 content { validUserDTO(email, username) }
