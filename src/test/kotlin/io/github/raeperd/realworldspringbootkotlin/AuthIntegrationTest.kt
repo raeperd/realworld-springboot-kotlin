@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
@@ -37,6 +38,20 @@ class AuthIntegrationTest(
                 jsonPath("user.token", not(emptyString()))
                 jsonPath("user.bio", emptyString())
                 jsonPath("user.image", nullValue())
+            }
+        }
+    }
+
+    @Test
+    fun `when login not exists user expect notFound status`() {
+        mockMvc.post("/users/login") {
+            contentType = APPLICATION_JSON
+            content = mapper.writeValueAsString(UserLoginDTO("user@email.com", "password"))
+            accept = APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+            content {
+                jsonPath("errors.body", not(emptyList<String>()))
             }
         }
     }
