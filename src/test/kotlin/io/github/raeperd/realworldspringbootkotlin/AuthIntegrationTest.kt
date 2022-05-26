@@ -6,7 +6,6 @@ import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
-import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -32,13 +31,7 @@ class AuthIntegrationTest(
 
         mockMvc.postUsers(email, "password", username).andExpect {
             status { isCreated() }
-            content {
-                jsonPath("user.email", equalTo(email))
-                jsonPath("user.username", equalTo(username))
-                jsonPath("user.token", not(emptyString()))
-                jsonPath("user.bio", emptyString())
-                jsonPath("user.image", nullValue())
-            }
+            content { validUserDTO(email, username) }
         }
     }
 
@@ -64,6 +57,21 @@ class AuthIntegrationTest(
             }
     }
 
+    @Transactional
+    @Test
+    fun `when login with valid user expect return valid user`() {
+        val email = "user@email.com"
+        val username = "username"
+        val password = "password"
+        mockMvc.postUsers(email, password, username)
+
+        mockMvc.postUsersLogin(email, password)
+            .andExpect {
+                status { isOk() }
+                content { validUserDTO(email, username) }
+            }
+    }
+
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
         return post("/users") {
             contentType = APPLICATION_JSON
@@ -82,5 +90,18 @@ class AuthIntegrationTest(
 
     private fun MockMvcResultMatchersDsl.notEmptyErrorResponse() {
         return jsonPath("errors.body", not(emptyList<String>()))
+    }
+
+    private fun MockMvcResultMatchersDsl.validUserDTO(
+        email: String,
+        username: String,
+        bio: String = "",
+        image: String? = null
+    ) {
+        jsonPath("user.email", equalTo(email))
+        jsonPath("user.username", equalTo(username))
+        jsonPath("user.token", not(emptyString()))
+        jsonPath("user.bio", equalTo(bio))
+        jsonPath("user.image", equalTo(image))
     }
 }
