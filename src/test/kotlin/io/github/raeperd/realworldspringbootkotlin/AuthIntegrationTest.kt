@@ -14,6 +14,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
 import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
@@ -70,6 +71,12 @@ class AuthIntegrationTest(
                 status { isOk() }
                 content { validUserDTO(email, username) }
             }
+    }
+
+    @Test
+    fun `when get user without authentication expect forbidden status`() {
+        mockMvc.get("/user")
+            .andExpect { status { isForbidden() } }
     }
 
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
