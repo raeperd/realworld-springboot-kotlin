@@ -76,7 +76,10 @@ class AuthIntegrationTest(
     @Test
     fun `when get user without authentication expect forbidden status`() {
         mockMvc.get("/user")
-            .andExpect { status { isForbidden() } }
+            .andExpect {
+                status { isForbidden() }
+                content { notEmptyErrorResponse() }
+            }
     }
 
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {

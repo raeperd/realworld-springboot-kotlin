@@ -21,7 +21,7 @@ class JWTAuthenticationFilter(
     private val jwtDeserializer: JWTDeserializer
 ) : OncePerRequestFilter() {
 
-    private val noJWTFoundResponse = listOf("No JWT Token found")
+    private val noJWTFoundResponse = listOf("No JWT Token found in AUTHORIZATION header")
         .let { ErrorResponseDTO.ErrorResponseDTONested(it) }
         .let { responseNested -> ErrorResponseDTO(responseNested) }
         .let { errorResponse -> mapper.writeValueAsString(errorResponse) }
