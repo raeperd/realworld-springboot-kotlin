@@ -12,4 +12,8 @@ class BcryptPasswordHashService(
         return bCryptPasswordEncoder.encode(rawPassword)
             .let { password -> Password(password) }
     }
+
+    override fun matchesPassword(password: Password, rawPassword: String): Boolean {
+        return bCryptPasswordEncoder.matches(rawPassword, password.hashedPassword)
+    }
 }

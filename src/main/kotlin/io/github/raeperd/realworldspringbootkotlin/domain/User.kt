@@ -12,7 +12,7 @@ interface User {
 }
 
 @Embeddable
-class Password(private var hashedPassword: String)
+class Password(var hashedPassword: String)
 
 data class UserRegistrationForm(
     val email: String,
@@ -22,4 +22,5 @@ data class UserRegistrationForm(
 
 interface UserRepository {
     fun saveNewUser(email: String, username: String, password: Password): User
+    fun findUserByEmail(email: String): User?
 }

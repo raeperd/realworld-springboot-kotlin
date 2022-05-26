@@ -15,6 +15,10 @@ class UserJpaRepository(
             .let { user -> userEntityRepository.save(user) }
     }
 
+    override fun findUserByEmail(email: String): User? {
+        return userEntityRepository.findFirstByEmail(email)
+    }
+
     private fun createUserEntity(email: String, username: String, password: Password): UserEntity {
         return UserEntity(
             id = null,
@@ -27,4 +31,6 @@ class UserJpaRepository(
     }
 }
 
-interface UserEntityRepository : JpaRepository<UserEntity, Long>
+interface UserEntityRepository : JpaRepository<UserEntity, Long> {
+    fun findFirstByEmail(email: String): User?
+}

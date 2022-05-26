@@ -24,6 +24,12 @@ class UserRestController(
             .toUserDTO()
     }
 
+    @PostMapping("/users/login")
+    fun postUsersLogin(@RequestBody dto: UserLoginDTO): UserDTO {
+        return userService.loginUser(dto.user.email, dto.user.password)
+            .toUserDTO()
+    }
+
     private fun User.toUserDTO(): UserDTO {
         return UserDTO(
             email = email,
@@ -55,6 +61,17 @@ data class UserPostDTO(
             password = user.password
         )
     }
+}
+
+data class UserLoginDTO(
+    val user: UserLoginDTONested
+) {
+    constructor(email: String, password: String) : this(UserLoginDTONested(email, password))
+
+    data class UserLoginDTONested(
+        val email: String,
+        val password: String
+    )
 }
 
 data class UserDTO(
