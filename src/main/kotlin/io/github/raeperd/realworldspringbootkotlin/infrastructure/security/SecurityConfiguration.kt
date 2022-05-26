@@ -1,7 +1,9 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.security
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializer
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTSerializer
 import io.github.raeperd.realworldspringbootkotlin.domain.PasswordHashService
+import io.github.raeperd.realworldspringbootkotlin.infrastructure.security.jwt.HS256JWTDeserializer
 import io.github.raeperd.realworldspringbootkotlin.infrastructure.security.jwt.HS256JWTSerializer
 import io.github.raeperd.realworldspringbootkotlin.infrastructure.security.jwt.HS256Secret
 import org.springframework.context.annotation.Bean
@@ -24,5 +26,10 @@ class SecurityConfiguration {
         secret.read(secretBuffer)
         val hS256Secret = HS256Secret(secretBuffer)
         return HS256JWTSerializer(hS256Secret)
+    }
+
+    @Bean
+    fun jwtDeserializer(): JWTDeserializer {
+        return HS256JWTDeserializer()
     }
 }
