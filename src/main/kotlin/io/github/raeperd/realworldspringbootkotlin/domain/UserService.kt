@@ -14,4 +14,9 @@ class UserService(
             password = password
         )
     }
+
+    fun loginUser(email: String, password: String): User {
+        return userRepository.findUserByEmail(email)
+            ?: throw NoSuchElementException("No such user with email $email")
+    }
 }

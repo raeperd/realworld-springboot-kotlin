@@ -15,6 +15,10 @@ class UserJpaRepository(
             .let { user -> userEntityRepository.save(user) }
     }
 
+    override fun findUserByEmail(email: String): User? {
+        return null
+    }
+
     private fun createUserEntity(email: String, username: String, password: Password): UserEntity {
         return UserEntity(
             id = null,
