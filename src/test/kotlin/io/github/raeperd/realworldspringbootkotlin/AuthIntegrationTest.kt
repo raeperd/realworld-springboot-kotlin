@@ -1,6 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import org.hamcrest.Matchers.emptyString
@@ -10,10 +12,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
 import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
@@ -72,6 +76,29 @@ class AuthIntegrationTest(
             }
     }
 
+    @Test
+    fun `when get user without authentication expect forbidden status`() {
+        mockMvc.get("/user")
+            .andExpect {
+                status { isForbidden() }
+                content { notEmptyErrorResponse() }
+            }
+    }
+
+    @Test
+    fun `when get user after login expect valid user`() {
+        val email = "user@email.com"
+        val username = "username"
+        val token = mockMvc.postUsers(email, "password", username)
+            .andReturnUserToken()
+
+        mockMvc.get("/user") { header(AUTHORIZATION, "Token $token") }
+            .andExpect {
+                status { isOk() }
+                content { validUserDTO(email, username) }
+            }
+    }
+
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
         return post("/users") {
             contentType = APPLICATION_JSON
@@ -103,5 +130,11 @@ class AuthIntegrationTest(
         jsonPath("user.token", not(emptyString()))
         jsonPath("user.bio", equalTo(bio))
         jsonPath("user.image", equalTo(image))
+    }
+
+    private fun ResultActionsDsl.andReturnUserToken(): String {
+        return andReturn().response.contentAsString
+            .let { mapper.readValue<UserDTO>(it) }
+            .user.token
     }
 }

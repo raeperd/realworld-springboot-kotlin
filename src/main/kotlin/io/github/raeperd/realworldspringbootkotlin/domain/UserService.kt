@@ -20,6 +20,10 @@ class UserService(
             .matchesPasswordOrThrow(password)
     }
 
+    fun findUserById(id: Long): User {
+        return userRepository.findUserById(id) ?: throw NoSuchElementException("No such user with id $id")
+    }
+
     private fun UserRepository.findUserByEmailOrThrow(email: String): User {
         return findUserByEmail(email) ?: throw NoSuchElementException("No such user with email $email")
     }
