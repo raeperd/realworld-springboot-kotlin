@@ -1,8 +1,9 @@
-package io.github.raeperd.realworldspringbootkotlin.web
+package io.github.raeperd.realworldspringbootkotlin.web.jwt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializationException
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializer
+import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -33,13 +34,12 @@ class JWTAuthenticationFilter(
     override fun doFilterInternal(
         request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain
     ) {
-        val jwt = request.getHeader(AUTHORIZATION)
-        if (jwt == null) {
-            return response.build(FORBIDDEN, APPLICATION_JSON, noJWTFoundResponse)
-        }
         try {
+            val jwt = request.getHeaderOrThrow(AUTHORIZATION)
             val payload = jwtDeserializer.deserialize(jwt)
             request.setAttribute(JWT_PAYLOAD_ATTRIBUTE_NAME, payload)
+        } catch (exception: NoSuchElementException) {
+            return response.build(FORBIDDEN, APPLICATION_JSON, noJWTFoundResponse)
         } catch (exception: JWTDeserializationException) {
             val message = mapper.writeValueAsString(ErrorResponseDTO(exception))
             return response.build(BAD_REQUEST, APPLICATION_JSON, message)
@@ -49,6 +49,10 @@ class JWTAuthenticationFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         return HttpRequestMeta(request) in exclusions
+    }
+
+    private fun HttpServletRequest.getHeaderOrThrow(name: String): String {
+        return getHeader(name) ?: throw NoSuchElementException()
     }
 
     private fun HttpServletResponse.build(status: HttpStatus, contentType: MediaType, body: String) {

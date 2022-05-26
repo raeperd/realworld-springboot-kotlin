@@ -2,6 +2,9 @@ package io.github.raeperd.realworldspringbootkotlin.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializer
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.HttpRequestMeta
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationFilter
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTPayloadArgumentResolver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.POST
