@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.security.jwt
 
-import com.nimbusds.jwt.JWTParser
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializationException
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -13,7 +13,7 @@ import java.security.SecureRandom
 import java.time.Instant.now
 
 @ExtendWith(MockitoExtension::class)
-internal class HS256JWTSerializerTest {
+internal class HS256JWTTest {
 
     private val secret: HS256Secret
 
@@ -24,6 +24,7 @@ internal class HS256JWTSerializerTest {
     }
 
     private val serializer = HS256JWTSerializer(secret)
+    private val deserializer = HS256JWTDeserializer()
 
     @Test
     fun `when HS256Secret with invalid bytes expect throw IllegalArgumentException`() {
@@ -36,11 +37,17 @@ internal class HS256JWTSerializerTest {
     fun `when serialize jwt expect sub and exp jwt claims`(@Mock user: User) {
         whenever(user.id).thenReturn(1)
 
-        val parsedClaimsSet = serializer.serialize(user)
-            .let { JWTParser.parse(it) }
-            .jwtClaimsSet
+        val payload = serializer.serialize(user)
+            .let { deserializer.deserialize(it) }
 
-        assertThat(parsedClaimsSet.subject).isEqualTo("1")
-        assertThat(parsedClaimsSet.expirationTime).isAfter(now().plusSeconds(11 * 60 * 60))
+        assertThat(payload.sub).isEqualTo(1)
+        assertThat(payload.exp).isAfter(now().plusSeconds(11 * 60 * 60))
+    }
+
+    @Test
+    fun `when deserialize invalid jwt expect JWTDeserializationException`() {
+        assertThatThrownBy {
+            deserializer.deserialize("invalid")
+        }.isInstanceOf(JWTDeserializationException::class.java)
     }
 }
