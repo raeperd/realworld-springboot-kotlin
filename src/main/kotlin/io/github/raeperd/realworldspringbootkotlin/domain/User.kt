@@ -12,7 +12,7 @@ interface User {
 }
 
 @Embeddable
-class Password(private var hashedPassword: String)
+class Password(var hashedPassword: String)
 
 data class UserRegistrationForm(
     val email: String,

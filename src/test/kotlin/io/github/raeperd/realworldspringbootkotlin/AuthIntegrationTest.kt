@@ -44,14 +44,11 @@ class AuthIntegrationTest(
 
     @Test
     fun `when login not exists user expect notFound status`() {
-        mockMvc.post("/users/login") {
-            contentType = APPLICATION_JSON
-            content = mapper.writeValueAsString(UserLoginDTO("user@email.com", "password"))
-            accept = APPLICATION_JSON
-        }.andExpect {
-            status { isNotFound() }
-            content { notEmptyErrorResponse() }
-        }
+        mockMvc.postUsersLogin("user@email.com", "password-different")
+            .andExpect {
+                status { isNotFound() }
+                content { notEmptyErrorResponse() }
+            }
     }
 
     @Transactional
