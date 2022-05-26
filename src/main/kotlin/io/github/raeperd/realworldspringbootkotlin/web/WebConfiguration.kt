@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.POST
 import org.springframework.web.filter.OncePerRequestFilter
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-class WebConfiguration {
+class WebConfiguration : WebMvcConfigurer {
 
     @Bean
     fun jwtAuthenticationFilter(mapper: ObjectMapper, jwtDeserializer: JWTDeserializer): OncePerRequestFilter {
@@ -20,5 +22,9 @@ class WebConfiguration {
             mapper = mapper,
             jwtDeserializer = jwtDeserializer
         )
+    }
+
+    override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
+        resolvers.add(JWTPayloadArgumentResolver())
     }
 }

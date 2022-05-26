@@ -4,6 +4,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.findByIdOrNull
 
 class UserJpaRepository(
     private val userEntityRepository: UserEntityRepository
@@ -17,6 +18,10 @@ class UserJpaRepository(
 
     override fun findUserByEmail(email: String): User? {
         return userEntityRepository.findFirstByEmail(email)
+    }
+
+    override fun findUserById(id: Long): User? {
+        return userEntityRepository.findByIdOrNull(id)
     }
 
     private fun createUserEntity(email: String, username: String, password: Password): UserEntity {

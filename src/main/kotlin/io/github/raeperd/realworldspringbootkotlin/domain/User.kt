@@ -23,4 +23,5 @@ data class UserRegistrationForm(
 interface UserRepository {
     fun saveNewUser(email: String, username: String, password: Password): User
     fun findUserByEmail(email: String): User?
+    fun findUserById(id: Long): User?
 }

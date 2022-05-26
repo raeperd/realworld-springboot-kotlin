@@ -21,6 +21,10 @@ class JWTAuthenticationFilter(
     private val jwtDeserializer: JWTDeserializer
 ) : OncePerRequestFilter() {
 
+    companion object {
+        const val JWT_PAYLOAD_ATTRIBUTE_NAME = "io.github.raeperd.realworldspringbootkotlin.jwt-payload"
+    }
+
     private val noJWTFoundResponse = listOf("No JWT Token found in AUTHORIZATION header")
         .let { ErrorResponseDTO.ErrorResponseDTONested(it) }
         .let { responseNested -> ErrorResponseDTO(responseNested) }
@@ -34,7 +38,8 @@ class JWTAuthenticationFilter(
             return response.build(FORBIDDEN, APPLICATION_JSON, noJWTFoundResponse)
         }
         try {
-            jwtDeserializer.deserialize(jwt)
+            val payload = jwtDeserializer.deserialize(jwt)
+            request.setAttribute(JWT_PAYLOAD_ATTRIBUTE_NAME, payload)
         } catch (exception: JWTDeserializationException) {
             val message = mapper.writeValueAsString(ErrorResponseDTO(exception))
             return response.build(BAD_REQUEST, APPLICATION_JSON, message)

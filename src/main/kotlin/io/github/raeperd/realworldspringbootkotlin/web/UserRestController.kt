@@ -1,10 +1,12 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTSerializer
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRegistrationForm
 import io.github.raeperd.realworldspringbootkotlin.domain.UserService
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -27,6 +29,12 @@ class UserRestController(
     @PostMapping("/users/login")
     fun postUsersLogin(@RequestBody dto: UserLoginDTO): UserDTO {
         return userService.loginUser(dto.user.email, dto.user.password)
+            .toUserDTO()
+    }
+
+    @GetMapping("/user")
+    fun getUser(payload: JWTPayload): UserDTO {
+        return userService.findUserById(payload.sub)
             .toUserDTO()
     }
 
