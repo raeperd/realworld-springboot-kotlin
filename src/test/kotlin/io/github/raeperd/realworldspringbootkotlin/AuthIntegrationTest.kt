@@ -86,7 +86,7 @@ class AuthIntegrationTest(
                 content { notEmptyErrorResponse() }
             }
 
-        mockMvc.get("/user") { header(AUTHORIZATION, "Token INVALID_TOKEN") }
+        mockMvc.getUser("INVALID TOKEN")
             .andExpect {
                 status { isBadRequest() }
                 content { notEmptyErrorResponse() }
@@ -100,7 +100,7 @@ class AuthIntegrationTest(
         val token = mockMvc.postUsers(email, "password", username)
             .andReturnUserToken()
 
-        mockMvc.get("/user") { header(AUTHORIZATION, "Token $token") }
+        mockMvc.getUser(token)
             .andExpect {
                 status { isOk() }
                 content { validUserDTO(email, username) }
@@ -116,7 +116,7 @@ class AuthIntegrationTest(
         val dto = UserPutDTO(
             "new-user@email.com",
             "new-username",
-            password = null,
+            password = "new-password",
             "image changed",
             "bio changed"
         )
@@ -133,6 +133,12 @@ class AuthIntegrationTest(
                     )
                 }
             }
+
+        mockMvc.postUsersLogin(dto.user.email!!, "password")
+            .andExpect { status { isBadRequest() } }
+
+        mockMvc.postUsersLogin(dto.user.email!!, dto.user.password!!)
+            .andExpect { status { isOk() } }
     }
 
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
@@ -147,6 +153,13 @@ class AuthIntegrationTest(
         return post("/users/login") {
             contentType = APPLICATION_JSON
             content = mapper.writeValueAsString(UserLoginDTO(email, password))
+            accept = APPLICATION_JSON
+        }
+    }
+
+    private fun MockMvc.getUser(token: String): ResultActionsDsl {
+        return get("/user") {
+            header(AUTHORIZATION, "Token $token")
             accept = APPLICATION_JSON
         }
     }

@@ -21,11 +21,27 @@ class UserService(
     }
 
     fun findUserById(id: Long): User {
-        return userRepository.findUserById(id) ?: throw NoSuchElementException("No such user with id $id")
+        return userRepository.findUserByIdOrThrow(id)
+    }
+
+    fun updateUserById(id: Long, form: UserUpdateForm): User {
+        return userRepository.findUserByIdOrThrow(id)
+            .apply {
+                form.email?.also { email = it }
+                form.username?.also { username = it }
+                form.password?.also { password = passwordHashService.hash(it) }
+                form.bio?.also { bio = it }
+                form.image?.also { image = it }
+            }
+            .run { userRepository.saveUser(this) }
     }
 
     private fun UserRepository.findUserByEmailOrThrow(email: String): User {
         return findUserByEmail(email) ?: throw NoSuchElementException("No such user with email $email")
+    }
+
+    private fun UserRepository.findUserByIdOrThrow(id: Long): User {
+        return findUserById(id) ?: throw NoSuchElementException("No such user with id $id")
     }
 
     private fun User.matchesPasswordOrThrow(rawPassword: String): User {

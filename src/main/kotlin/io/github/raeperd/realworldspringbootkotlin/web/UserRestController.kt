@@ -5,9 +5,11 @@ import io.github.raeperd.realworldspringbootkotlin.domain.JWTSerializer
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRegistrationForm
 import io.github.raeperd.realworldspringbootkotlin.domain.UserService
+import io.github.raeperd.realworldspringbootkotlin.domain.UserUpdateForm
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -38,12 +40,18 @@ class UserRestController(
             .toUserDTO()
     }
 
+    @PutMapping("/user")
+    fun putUser(payload: JWTPayload, @RequestBody dto: UserPutDTO): UserDTO {
+        return userService.updateUserById(payload.sub, dto.toUserUpdateForm())
+            .toUserDTO()
+    }
+
     private fun User.toUserDTO(): UserDTO {
         return UserDTO(
             email = email,
             username = username,
             token = jwtSerializer.serialize(this),
-            image = null,
+            image = image,
             bio = bio
         )
     }
@@ -100,6 +108,16 @@ data class UserPutDTO(
             bio = bio
         )
     )
+
+    fun toUserUpdateForm(): UserUpdateForm {
+        return UserUpdateForm(
+            email = user.email,
+            username = user.username,
+            password = user.password,
+            image = user.image,
+            bio = user.bio,
+        )
+    }
 
     data class UserPutDTONested(
         val email: String?,

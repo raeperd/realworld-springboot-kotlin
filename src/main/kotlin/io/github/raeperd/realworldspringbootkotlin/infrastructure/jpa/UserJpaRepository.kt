@@ -11,7 +11,6 @@ class UserJpaRepository(
 ) : UserRepository {
 
     override fun saveNewUser(email: String, username: String, password: Password): User {
-
         return createUserEntity(email, username, password)
             .let { user -> userEntityRepository.save(user) }
     }
@@ -24,6 +23,13 @@ class UserJpaRepository(
         return userEntityRepository.findByIdOrNull(id)
     }
 
+    override fun saveUser(user: User): User {
+        if (user is UserEntity) {
+            return userEntityRepository.save(user)
+        }
+        throw IllegalArgumentException("Invalid user argument. expected UserEntity but ${user.javaClass} given")
+    }
+
     private fun createUserEntity(email: String, username: String, password: Password): UserEntity {
         return UserEntity(
             id = null,
@@ -31,7 +37,7 @@ class UserJpaRepository(
             username = username,
             password = password,
             bio = "",
-            image = ""
+            image = null
         )
     }
 }
