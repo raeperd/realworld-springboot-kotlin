@@ -82,6 +82,34 @@ data class UserLoginDTO(
     )
 }
 
+data class UserPutDTO(
+    val user: UserPutDTONested
+) {
+    constructor(
+        email: String? = null,
+        username: String? = null,
+        password: String? = null,
+        image: String? = null,
+        bio: String? = null,
+    ) : this(
+        UserPutDTONested(
+            email = email,
+            username = username,
+            password = password,
+            image = image,
+            bio = bio
+        )
+    )
+
+    data class UserPutDTONested(
+        val email: String?,
+        val username: String?,
+        val password: String?,
+        val image: String?,
+        val bio: String?,
+    )
+}
+
 data class UserDTO(
     val user: UserDTONested
 ) {

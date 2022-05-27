@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
 import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
@@ -105,6 +107,34 @@ class AuthIntegrationTest(
             }
     }
 
+    @Transactional
+    @Test
+    fun `when put user with fields expect return updated user`() {
+        val token = mockMvc.postUsers("user@email.com", "password", "username")
+            .andReturnUserToken()
+
+        val dto = UserPutDTO(
+            "new-user@email.com",
+            "new-username",
+            password = null,
+            "image changed",
+            "bio changed"
+        )
+
+        mockMvc.putUser(token, dto)
+            .andExpect {
+                status { isOk() }
+                content {
+                    validUserDTO(
+                        email = dto.user.email,
+                        username = dto.user.username,
+                        bio = dto.user.bio,
+                        image = dto.user.image
+                    )
+                }
+            }
+    }
+
     private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
         return post("/users") {
             contentType = APPLICATION_JSON
@@ -121,14 +151,23 @@ class AuthIntegrationTest(
         }
     }
 
+    private fun MockMvc.putUser(token: String, dto: UserPutDTO): ResultActionsDsl {
+        return put("/user") {
+            header(AUTHORIZATION, "Token $token")
+            contentType = APPLICATION_JSON
+            content = mapper.writeValueAsString(dto)
+            accept = APPLICATION_JSON
+        }
+    }
+
     private fun MockMvcResultMatchersDsl.notEmptyErrorResponse() {
         return jsonPath("errors.body", not(emptyList<String>()))
     }
 
     private fun MockMvcResultMatchersDsl.validUserDTO(
-        email: String,
-        username: String,
-        bio: String = "",
+        email: String?,
+        username: String?,
+        bio: String? = "",
         image: String? = null
     ) {
         jsonPath("user.email", equalTo(email))
