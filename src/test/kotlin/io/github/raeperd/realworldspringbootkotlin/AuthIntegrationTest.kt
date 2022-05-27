@@ -77,10 +77,16 @@ class AuthIntegrationTest(
     }
 
     @Test
-    fun `when get user without authentication expect forbidden status`() {
+    fun `when get user with invalid authentication expect forbidden status`() {
         mockMvc.get("/user")
             .andExpect {
                 status { isForbidden() }
+                content { notEmptyErrorResponse() }
+            }
+
+        mockMvc.get("/user") { header(AUTHORIZATION, "Token INVALID_TOKEN") }
+            .andExpect {
+                status { isBadRequest() }
                 content { notEmptyErrorResponse() }
             }
     }
