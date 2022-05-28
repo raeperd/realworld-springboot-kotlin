@@ -9,6 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.jpa") version "1.6.21"
     id("org.sonarqube") version "3.3"
     id("com.google.cloud.tools.jib") version "3.2.1"
+    id("org.flywaydb.flyway") version "8.5.11"
     jacoco
 }
 

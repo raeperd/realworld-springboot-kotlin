@@ -8,7 +8,9 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.IDENTITY
 import javax.persistence.Id
+import javax.persistence.Table
 
+@Table(name = "users")
 @Entity
 class UserEntity(
     @Id @GeneratedValue(strategy = IDENTITY)
