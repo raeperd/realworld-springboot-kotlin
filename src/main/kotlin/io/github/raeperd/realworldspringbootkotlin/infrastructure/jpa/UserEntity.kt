@@ -2,6 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.User
+import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -16,7 +17,8 @@ class UserEntity(
     override var username: String,
     @Embedded
     override var password: Password,
-    override var image: String,
+    @Column(nullable = true)
+    override var image: String?,
     override var bio: String,
 ) : User {
 }
