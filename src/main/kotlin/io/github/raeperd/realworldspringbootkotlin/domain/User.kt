@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
+import javax.persistence.Column
 import javax.persistence.Embeddable
 
 interface User {
@@ -12,7 +13,10 @@ interface User {
 }
 
 @Embeddable
-class Password(var hashedPassword: String)
+class Password(
+    @Column(name = "password")
+    var hashedPassword: String
+)
 
 data class UserRegistrationForm(
     val email: String,
