@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -18,6 +19,12 @@ class RestControllerAdvice {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(exception: IllegalArgumentException): ErrorResponseDTO {
+        return ErrorResponseDTO(exception)
+    }
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception::class)
+    fun handleUnknownException(exception: Exception): ErrorResponseDTO {
         return ErrorResponseDTO(exception)
     }
 }
