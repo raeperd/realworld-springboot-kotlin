@@ -23,6 +23,10 @@ class UserJpaRepository(
         return userEntityRepository.findByIdOrNull(id)
     }
 
+    override fun findUserByUsername(name: String): User? {
+        return userEntityRepository.findFirstByUsername(name)
+    }
+
     override fun saveUser(user: User): User {
         if (user is UserEntity) {
             return userEntityRepository.save(user)
@@ -44,4 +48,5 @@ class UserJpaRepository(
 
 interface UserEntityRepository : JpaRepository<UserEntity, Long> {
     fun findFirstByEmail(email: String): User?
+    fun findFirstByUsername(username: String): User?
 }

@@ -11,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
@@ -31,7 +30,7 @@ class ProfileIntegrationTest(
 
         mockMvc.postMockUser()
 
-        mockMvc.post("/profiles/${MockUser.username}")
+        mockMvc.get("/profiles/${MockUser.username}")
             .andExpect {
                 status { isOk() }
                 content { json(mapper.writeValueAsString(mockUserProfileDTO)) }

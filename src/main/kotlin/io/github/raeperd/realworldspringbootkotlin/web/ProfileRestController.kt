@@ -1,15 +1,26 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
+import io.github.raeperd.realworldspringbootkotlin.domain.Profile
+import io.github.raeperd.realworldspringbootkotlin.domain.ProfileService
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class ProfileRestController {
-
-    @GetMapping
-    fun getProfiles(): ProfileDTO {
-        return ProfileDTO("", "", "", false)
+class ProfileRestController(
+    private val profileService: ProfileService
+) {
+    @GetMapping("/profiles/{username}")
+    fun getProfiles(@PathVariable username: String, payload: JWTPayload?): ProfileDTO {
+        return (if (payload != null) {
+            profileService.viewUserProfile(payload.sub, username)
+        } else {
+            profileService.getUserProfile(username)
+        }).toProfileDTO()
     }
+
+    private fun Profile.toProfileDTO() = ProfileDTO(username, bio, image, following)
 }
 
 data class ProfileDTO(

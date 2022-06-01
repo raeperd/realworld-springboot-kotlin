@@ -10,6 +10,7 @@ interface User {
     var password: Password
     var image: String?
     var bio: String
+    fun viewUserProfile(user: User): Profile
 }
 
 @Embeddable
@@ -32,9 +33,25 @@ data class UserUpdateForm(
     val bio: String?
 )
 
-interface UserRepository {
+interface UserRepository : ReadOnlyUserRepository {
     fun saveNewUser(email: String, username: String, password: Password): User
+    fun saveUser(user: User): User
+}
+
+interface ReadOnlyUserRepository {
     fun findUserByEmail(email: String): User?
     fun findUserById(id: Long): User?
-    fun saveUser(user: User): User
+    fun findUserByUsername(name: String): User?
+
+    fun findUserByEmailOrThrow(email: String): User {
+        return findUserByEmail(email) ?: throw NoSuchElementException("No such user with email $email")
+    }
+
+    fun findUserByIdOrThrow(id: Long): User {
+        return findUserById(id) ?: throw NoSuchElementException("No such user with id $id")
+    }
+
+    fun findUserByUsernameOrThrow(name: String): User {
+        return findUserByUsername(name) ?: throw NoSuchElementException("No such user with name $name")
+    }
 }
