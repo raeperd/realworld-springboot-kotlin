@@ -3,6 +3,7 @@ package io.github.raeperd.realworldspringbootkotlin
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.raeperd.realworldspringbootkotlin.util.MockUser
+import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.util.postUsers
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
@@ -35,12 +36,9 @@ class AuthIntegrationTest(
     @Transactional
     @Test
     fun `when post users expect valid json response`() {
-        val email = "user@email.com"
-        val username = "username"
-
-        mockMvc.postUsers(email, "password", username).andExpect {
+        mockMvc.postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username).andExpect {
             status { isCreated() }
-            content { validUserDTO(email, username) }
+            content { validUserDTO(MockUser.email, MockUser.username) }
         }
     }
 
@@ -155,10 +153,6 @@ class AuthIntegrationTest(
             content = mapper.writeValueAsString(dto)
             accept = APPLICATION_JSON
         }
-    }
-
-    private fun MockMvcResultMatchersDsl.notEmptyErrorResponse() {
-        return jsonPath("errors.body", not(emptyList<String>()))
     }
 
     private fun MockMvcResultMatchersDsl.validUserDTO(
