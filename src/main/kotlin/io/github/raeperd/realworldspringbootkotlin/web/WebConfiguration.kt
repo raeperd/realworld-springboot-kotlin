@@ -7,6 +7,7 @@ import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationFilt
 import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTPayloadArgumentResolver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
@@ -20,7 +21,8 @@ class WebConfiguration : WebMvcConfigurer {
         return JWTAuthenticationFilter(
             exclusions = setOf(
                 HttpRequestMeta(POST, "/users"),
-                HttpRequestMeta(POST, "/users/login")
+                HttpRequestMeta(POST, "/users/login"),
+                HttpRequestMeta(GET, "/profiles")
             ),
             mapper = mapper,
             jwtDeserializer = jwtDeserializer

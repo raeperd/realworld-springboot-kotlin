@@ -49,7 +49,9 @@ class JWTAuthenticationFilter(
     }
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-        return HttpRequestMeta(request) in exclusions
+        val requestMeta = HttpRequestMeta(request)
+        return requestMeta in exclusions ||
+            exclusions.any { excludeMeta -> excludeMeta.matches(requestMeta) }
     }
 
     private fun HttpServletRequest.getHeaderOrThrow(name: String): String {
@@ -71,4 +73,7 @@ data class HttpRequestMeta(
         HttpMethod.resolve(request.method) ?: throw IllegalStateException("No such HttpMethod ${request.method}"),
         request.requestURI
     )
+
+    fun matches(other: HttpRequestMeta): Boolean =
+        method == other.method && other.url.startsWith(url)
 }
