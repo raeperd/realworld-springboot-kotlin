@@ -2,9 +2,11 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.github.raeperd.realworldspringbootkotlin.util.MockUser
+import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
+import io.github.raeperd.realworldspringbootkotlin.util.postUsers
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
-import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
 import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
@@ -29,6 +31,7 @@ class AuthIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper
 ) {
+
     @Transactional
     @Test
     fun `when post users expect valid json response`() {
@@ -41,22 +44,18 @@ class AuthIntegrationTest(
         }
     }
 
+    @Transactional
     @Test
-    fun `when login not exists user expect notFound status`() {
-        mockMvc.postUsersLogin("user@email.com", "password-different")
+    fun `when invalid login expect error responses`() {
+        mockMvc.postMockUser()
+
+        mockMvc.postUsersLogin("bad-user@email.com", MockUser.RAW_PASSWORD)
             .andExpect {
                 status { isNotFound() }
                 content { notEmptyErrorResponse() }
             }
-    }
 
-    @Transactional
-    @Test
-    fun `when login with invalid password expect badRequest status`() {
-        val email = "user@email.com"
-        mockMvc.postUsers(email, "password", "username")
-
-        mockMvc.postUsersLogin(email, "password-different")
+        mockMvc.postUsersLogin(MockUser.email, "bad-password")
             .andExpect {
                 status { isBadRequest() }
                 content { notEmptyErrorResponse() }
@@ -66,15 +65,12 @@ class AuthIntegrationTest(
     @Transactional
     @Test
     fun `when login with valid user expect return valid user`() {
-        val email = "user@email.com"
-        val username = "username"
-        val password = "password"
-        mockMvc.postUsers(email, password, username)
+        mockMvc.postMockUser()
 
-        mockMvc.postUsersLogin(email, password)
+        mockMvc.postUsersLogin(MockUser.email, MockUser.RAW_PASSWORD)
             .andExpect {
                 status { isOk() }
-                content { validUserDTO(email, username) }
+                content { validUserDTO(MockUser.email, MockUser.username) }
             }
     }
 
@@ -95,23 +91,19 @@ class AuthIntegrationTest(
 
     @Test
     fun `when get user after login expect valid user`() {
-        val email = "user@email.com"
-        val username = "username"
-        val token = mockMvc.postUsers(email, "password", username)
-            .andReturnUserToken()
+        val token = mockMvc.postMockUser().andReturnUserToken()
 
         mockMvc.getUser(token)
             .andExpect {
                 status { isOk() }
-                content { validUserDTO(email, username) }
+                content { validUserDTO(MockUser.email, MockUser.username) }
             }
     }
 
     @Transactional
     @Test
     fun `when put user with fields expect return updated user`() {
-        val token = mockMvc.postUsers("user@email.com", "password", "username")
-            .andReturnUserToken()
+        val token = mockMvc.postMockUser().andReturnUserToken()
 
         val dto = UserPutDTO(
             "new-user@email.com",
@@ -139,14 +131,6 @@ class AuthIntegrationTest(
 
         mockMvc.postUsersLogin(dto.user.email!!, dto.user.password!!)
             .andExpect { status { isOk() } }
-    }
-
-    private fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
-        return post("/users") {
-            contentType = APPLICATION_JSON
-            content = mapper.writeValueAsString(UserPostDTO(email, password, username))
-            accept = APPLICATION_JSON
-        }
     }
 
     private fun MockMvc.postUsersLogin(email: String, password: String): ResultActionsDsl {
