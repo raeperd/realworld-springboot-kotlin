@@ -12,6 +12,7 @@ interface User {
     var bio: String
     fun viewUserProfile(user: User): Profile
     fun followUser(userToFollow: User)
+    fun unfollowUser(userToUnFollow: User)
 }
 
 @Embeddable

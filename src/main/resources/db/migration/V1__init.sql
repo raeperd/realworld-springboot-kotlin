@@ -1,7 +1,7 @@
 create table if not exists users
 (
     id       bigint primary key auto_increment,
-    username varchar(100) not null,
+    username varchar(100) not null unique,
     bio      varchar(1024),
     image    varchar(1024),
     email    varchar(255) not null,

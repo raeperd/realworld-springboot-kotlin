@@ -27,4 +27,13 @@ class ProfileService(
             userRepository.saveUser(this)
         }.run { viewUserProfile(userToFollow) }
     }
+
+    fun unfollowUser(userId: Long, usernameToUnFollow: String): Profile {
+        val user = userRepository.findUserByIdOrThrow(userId)
+        val userToFollow = userRepository.findUserByUsernameOrThrow(usernameToUnFollow)
+        return user.run {
+            unfollowUser(userToFollow)
+            userRepository.saveUser(this)
+        }.run { viewUserProfile(userToFollow) }
+    }
 }

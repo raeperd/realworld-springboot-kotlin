@@ -33,6 +33,10 @@ object MockUser : User {
     override fun followUser(userToFollow: User) {
         throw NotImplementedError()
     }
+
+    override fun unfollowUser(userToUnFollow: User) {
+        throw NotImplementedError()
+    }
 }
 
 fun MockMvc.postMockUser() = postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username)

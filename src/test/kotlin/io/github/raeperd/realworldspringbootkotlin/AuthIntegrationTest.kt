@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 import org.springframework.transaction.annotation.Transactional
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest
 class AuthIntegrationTest(
@@ -32,7 +33,6 @@ class AuthIntegrationTest(
     @Autowired private val mapper: ObjectMapper
 ) {
 
-    @Transactional
     @Test
     fun `when post users expect valid json response`() {
         mockMvc.postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username).andExpect {
@@ -41,7 +41,6 @@ class AuthIntegrationTest(
         }
     }
 
-    @Transactional
     @Test
     fun `when invalid login expect error responses`() {
         mockMvc.postMockUser()
@@ -59,7 +58,6 @@ class AuthIntegrationTest(
             }
     }
 
-    @Transactional
     @Test
     fun `when login with valid user expect return valid user`() {
         mockMvc.postMockUser()
@@ -97,7 +95,6 @@ class AuthIntegrationTest(
             }
     }
 
-    @Transactional
     @Test
     fun `when put user with fields expect return updated user`() {
         val token = mockMvc.postMockUser().andReturnUserToken()
