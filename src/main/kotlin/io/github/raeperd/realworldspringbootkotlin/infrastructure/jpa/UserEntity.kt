@@ -3,12 +3,16 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.IDENTITY
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
+import javax.persistence.ManyToMany
 import javax.persistence.Table
 
 @Table(name = "users")
@@ -18,14 +22,31 @@ class UserEntity(
     override var id: Long?,
     override var email: String,
     override var username: String,
+
     @Embedded
     override var password: Password,
+
     @Column(nullable = true)
     override var image: String?,
     override var bio: String,
+
+    @JoinTable(
+        name = "user_followings",
+        joinColumns = [JoinColumn(name = "follower_id", referencedColumnName = "id")],
+        inverseJoinColumns = [JoinColumn(name = "followee_id", referencedColumnName = "id")]
+    )
+    @ManyToMany(cascade = [CascadeType.REMOVE])
+    private var followingUsers: MutableSet<UserEntity> = HashSet()
 ) : User {
+
     override fun viewUserProfile(user: User): Profile {
-        // TODO: Implement actual following property using @JoinTable
-        return Profile(user.email, user.username, user.image, user.bio, false)
+        return Profile(user.email, user.username, user.image, user.bio, followingUsers.contains(user))
+    }
+
+    override fun followUser(userToFollow: User) {
+        if (userToFollow !is UserEntity) {
+            throw IllegalArgumentException("Expected UserEntity but given ${userToFollow.javaClass}")
+        }
+        followingUsers.add(userToFollow)
     }
 }

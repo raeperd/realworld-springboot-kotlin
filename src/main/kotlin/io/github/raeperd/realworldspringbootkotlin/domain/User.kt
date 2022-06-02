@@ -11,6 +11,7 @@ interface User {
     var image: String?
     var bio: String
     fun viewUserProfile(user: User): Profile
+    fun followUser(userToFollow: User)
 }
 
 @Embeddable
