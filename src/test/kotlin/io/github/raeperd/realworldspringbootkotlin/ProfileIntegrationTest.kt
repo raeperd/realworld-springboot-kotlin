@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
@@ -52,13 +53,20 @@ class ProfileIntegrationTest(
             .andReturnResponseBody<UserDTO>()
 
         mockMvc.get("/profiles/${dto.user.username}")
-            .andExpect { content { responseJson(ProfileDTO(dto.user.username, dto.user.bio, dto.user.image, false)) } }
+            .andExpect { content { responseJson(dto.toProfileDTOWithFollowing(false)) } }
 
         mockMvc.post("/profiles/${dto.user.username}/follow") {
             withAuthToken(token)
         }.andExpect {
             status { isOk() }
-            content { responseJson(ProfileDTO(dto.user.username, dto.user.bio, dto.user.image, true)) }
+            content { responseJson(dto.toProfileDTOWithFollowing(true)) }
+        }
+
+        mockMvc.delete("/profiles/${dto.user.username}/follow") {
+            withAuthToken(token)
+        }.andExpect {
+            status { isNoContent() }
+            content { responseJson(dto.toProfileDTOWithFollowing(false)) }
         }
     }
 
@@ -68,4 +76,7 @@ class ProfileIntegrationTest(
         MockUser.image,
         false
     )
+
+    private fun UserDTO.toProfileDTOWithFollowing(following: Boolean) =
+        ProfileDTO(user.username, user.bio, user.image, following)
 }
