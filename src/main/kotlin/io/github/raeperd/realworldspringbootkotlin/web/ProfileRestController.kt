@@ -3,12 +3,10 @@ package io.github.raeperd.realworldspringbootkotlin.web
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileService
-import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -30,7 +28,6 @@ class ProfileRestController(
             .toProfileDTO()
     }
 
-    @ResponseStatus(NO_CONTENT)
     @DeleteMapping("/profiles/{username}/follow")
     fun deleteProfilesFollow(@PathVariable username: String, payload: JWTPayload): ProfileDTO {
         return profileService.unfollowUser(payload.sub, username)

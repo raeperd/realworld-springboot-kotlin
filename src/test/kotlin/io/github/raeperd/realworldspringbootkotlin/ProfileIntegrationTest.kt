@@ -66,7 +66,7 @@ class ProfileIntegrationTest(
         mockMvc.delete("/profiles/${dto.user.username}/follow") {
             withAuthToken(token)
         }.andExpect {
-            status { isNoContent() }
+            status { isOk() }
             content { responseJson(dto.toProfileDTOWithFollowing(false)) }
         }
 
