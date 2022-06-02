@@ -59,12 +59,20 @@ class ProfileIntegrationTest(
             content { responseJson(dto.toProfileDTOWithFollowing(true)) }
         }
 
+        mockMvc.get("/profiles/${dto.user.username}") {
+            withAuthToken(token)
+        }.andExpect { content { responseJson(dto.toProfileDTOWithFollowing(true)) } }
+
         mockMvc.delete("/profiles/${dto.user.username}/follow") {
             withAuthToken(token)
         }.andExpect {
             status { isNoContent() }
             content { responseJson(dto.toProfileDTOWithFollowing(false)) }
         }
+
+        mockMvc.get("/profiles/${dto.user.username}") {
+            withAuthToken(token)
+        }.andExpect { content { responseJson(dto.toProfileDTOWithFollowing(false)) } }
     }
 
     private val mockUserProfileDTO = ProfileDTO(
