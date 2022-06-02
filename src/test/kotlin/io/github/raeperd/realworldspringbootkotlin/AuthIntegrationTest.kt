@@ -1,12 +1,12 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.raeperd.realworldspringbootkotlin.util.MockUser
+import io.github.raeperd.realworldspringbootkotlin.util.andReturnUserToken
 import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.util.postUsers
-import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
 import org.hamcrest.Matchers.emptyString
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
@@ -141,14 +140,14 @@ class AuthIntegrationTest(
 
     private fun MockMvc.getUser(token: String): ResultActionsDsl {
         return get("/user") {
-            header(AUTHORIZATION, "Token $token")
+            withAuthToken(token)
             accept = APPLICATION_JSON
         }
     }
 
     private fun MockMvc.putUser(token: String, dto: UserPutDTO): ResultActionsDsl {
         return put("/user") {
-            header(AUTHORIZATION, "Token $token")
+            withAuthToken(token)
             contentType = APPLICATION_JSON
             content = mapper.writeValueAsString(dto)
             accept = APPLICATION_JSON
@@ -166,11 +165,5 @@ class AuthIntegrationTest(
         jsonPath("user.token", not(emptyString()))
         jsonPath("user.bio", equalTo(bio))
         jsonPath("user.image", equalTo(image))
-    }
-
-    private fun ResultActionsDsl.andReturnUserToken(): String {
-        return andReturn().response.contentAsString
-            .let { mapper.readValue<UserDTO>(it) }
-            .user.token
     }
 }

@@ -7,3 +7,12 @@ create table if not exists users
     email    varchar(255) not null,
     password varchar(255) not null
 );
+
+create table if not exists user_followings
+(
+    follower_id BIGINT not null,
+    followee_id BIGINT not null,
+    primary key (follower_id, followee_id),
+    constraint fk_follower foreign key (follower_id) references users (id) on delete cascade,
+    constraint fk_followee foreign key (followee_id) references users (id) on delete cascade
+);

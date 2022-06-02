@@ -6,7 +6,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.User
 import org.springframework.test.web.servlet.MockMvc
 
 object MockUser : User {
-    const val RAW_PASSWORD = "password";
+    const val RAW_PASSWORD = "password"
 
     override val id: Long
         get() = 1
@@ -27,6 +27,10 @@ object MockUser : User {
         set(value) {}
 
     override fun viewUserProfile(user: User): Profile {
+        throw NotImplementedError()
+    }
+
+    override fun followUser(userToFollow: User) {
         throw NotImplementedError()
     }
 }
