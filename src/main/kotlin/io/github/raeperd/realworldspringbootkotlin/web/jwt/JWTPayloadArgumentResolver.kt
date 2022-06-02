@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web.jwt
 
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
-import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationFilter.Companion.JWT_PAYLOAD_ATTRIBUTE_NAME
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationFilter.Companion.JWT_AUTHENTICATION_ATTRIBUTE_NAME
 import org.springframework.core.MethodParameter
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -19,6 +19,6 @@ class JWTPayloadArgumentResolver : HandlerMethodArgumentResolver {
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): Any? {
-        return webRequest.getAttribute(JWT_PAYLOAD_ATTRIBUTE_NAME, 0)
+        return webRequest.getAttribute(JWT_AUTHENTICATION_ATTRIBUTE_NAME, 0)
     }
 }
