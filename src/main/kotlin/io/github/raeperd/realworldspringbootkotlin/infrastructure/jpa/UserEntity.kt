@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
+import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import javax.persistence.Column
 import javax.persistence.Embedded
@@ -23,4 +24,8 @@ class UserEntity(
     override var image: String?,
     override var bio: String,
 ) : User {
+    override fun viewUserProfile(user: User): Profile {
+        // TODO: Implement actual following property using @JoinTable
+        return Profile(user.email, user.username, user.image, user.bio, false)
+    }
 }

@@ -36,14 +36,6 @@ class UserService(
             .run { userRepository.saveUser(this) }
     }
 
-    private fun UserRepository.findUserByEmailOrThrow(email: String): User {
-        return findUserByEmail(email) ?: throw NoSuchElementException("No such user with email $email")
-    }
-
-    private fun UserRepository.findUserByIdOrThrow(id: Long): User {
-        return findUserById(id) ?: throw NoSuchElementException("No such user with id $id")
-    }
-
     private fun User.matchesPasswordOrThrow(rawPassword: String): User {
         if (!passwordHashService.matchesPassword(password, rawPassword)) {
             throw IllegalArgumentException("User password not matched")
@@ -51,3 +43,4 @@ class UserService(
         return this
     }
 }
+
