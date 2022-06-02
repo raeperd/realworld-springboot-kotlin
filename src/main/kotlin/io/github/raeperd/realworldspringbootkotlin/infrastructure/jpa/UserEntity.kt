@@ -21,6 +21,8 @@ class UserEntity(
     @Id @GeneratedValue(strategy = IDENTITY)
     override var id: Long?,
     override var email: String,
+
+    @Column(unique = true)
     override var username: String,
 
     @Embedded
@@ -48,5 +50,26 @@ class UserEntity(
             throw IllegalArgumentException("Expected UserEntity but given ${userToFollow.javaClass}")
         }
         followingUsers.add(userToFollow)
+    }
+
+    override fun unfollowUser(userToUnFollow: User) {
+        if (userToUnFollow !is UserEntity) {
+            throw IllegalArgumentException("Expected UserEntity but given ${userToUnFollow.javaClass}")
+        }
+        followingUsers.remove(userToUnFollow)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is UserEntity) {
+            return false
+        }
+        return username == other.username
+    }
+
+    override fun hashCode(): Int {
+        return username.hashCode()
     }
 }

@@ -52,9 +52,6 @@ class ProfileIntegrationTest(
         val dto = mockMvc.postUsers("celeb@email.com", "password", "celeb")
             .andReturnResponseBody<UserDTO>()
 
-        mockMvc.get("/profiles/${dto.user.username}")
-            .andExpect { content { responseJson(dto.toProfileDTOWithFollowing(false)) } }
-
         mockMvc.post("/profiles/${dto.user.username}/follow") {
             withAuthToken(token)
         }.andExpect {
