@@ -33,8 +33,6 @@ class ProfileRestController(
         return profileService.unfollowUser(payload.sub, username)
             .toProfileDTO()
     }
-
-    private fun Profile.toProfileDTO() = ProfileDTO(username, bio, image, following)
 }
 
 data class ProfileDTO(
@@ -56,3 +54,5 @@ data class ProfileDTO(
         val following: Boolean
     )
 }
+
+fun Profile.toProfileDTO() = ProfileDTO(username, bio, image, following)

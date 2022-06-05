@@ -23,7 +23,6 @@ class ArticleIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper
 ) {
-
     @Test
     fun `when post articles expect return valid json`() {
         val token = mockMvc.postMockUser().andReturnUserToken()
@@ -51,6 +50,6 @@ class ArticleIntegrationTest(
         jsonPath("article.title", equalTo(title))
         jsonPath("article.description", equalTo(description))
         jsonPath("article.body", equalTo(body))
-        jsonPath("article.tags", equalTo(tags))
+        jsonPath("article.tagList", equalTo(tags))
     }
 }
