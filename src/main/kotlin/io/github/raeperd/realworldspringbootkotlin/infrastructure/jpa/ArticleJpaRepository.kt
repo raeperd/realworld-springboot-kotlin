@@ -41,7 +41,7 @@ class ArticleJpaRepository(
             tagList = tags.toMutableList(),
             title = form.title,
             description = form.description,
-            body = form.body
+            body = form.body,
         )
     }
 }

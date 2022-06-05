@@ -2,6 +2,8 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Tag
+import java.time.Instant
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType.EAGER
 import javax.persistence.GeneratedValue
@@ -33,7 +35,11 @@ class ArticleEntity(
 
     override var title: String,
     override var description: String,
-    override var body: String
+    override var body: String,
+    @Column(name = "created_at", nullable = false)
+    override val createdAt: Instant = Instant.now(),
+    @Column(name = "updated_at", nullable = false)
+    override val updatedAt: Instant = createdAt,
 ) : Article {
 
 }
