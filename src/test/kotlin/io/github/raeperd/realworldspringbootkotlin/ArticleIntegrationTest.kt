@@ -2,6 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.util.responseJson
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
@@ -55,6 +56,12 @@ class ArticleIntegrationTest(
         val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
         val articleDTO = mockMvc.postMockArticle(author.user.token)
             .andReturnResponseBody<ArticleDTO>()
+
+        mockMvc.get("/articles/not-exists-slug")
+            .andExpect {
+                status { isNotFound() }
+                content { notEmptyErrorResponse() }
+            }
 
         mockMvc.get("/articles/${articleDTO.article.slug}")
             .andExpect {
