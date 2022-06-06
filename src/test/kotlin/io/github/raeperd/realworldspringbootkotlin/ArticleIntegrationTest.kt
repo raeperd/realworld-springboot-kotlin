@@ -2,8 +2,11 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
+import io.github.raeperd.realworldspringbootkotlin.util.responseJson
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
+import io.github.raeperd.realworldspringbootkotlin.web.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
 import org.hamcrest.Matchers.emptyString
@@ -17,6 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
+import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
@@ -43,6 +48,35 @@ class ArticleIntegrationTest(
         }.andExpect {
             status { isCreated() }
             content { validArticleDTO(dto, author) }
+        }
+    }
+
+    @Test
+    fun `when get articles by slug expect return valid json`() {
+        val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
+        val articleDTO = mockMvc.postMockArticle(author.user.token)
+            .andReturnResponseBody<ArticleDTO>()
+
+        mockMvc.get("/articles/not-exists-slug")
+            .andExpect {
+                status { isNotFound() }
+                content { notEmptyErrorResponse() }
+            }
+
+        mockMvc.get("/articles/${articleDTO.article.slug}")
+            .andExpect {
+                status { isOk() }
+                content { responseJson(articleDTO) }
+            }
+    }
+
+    private fun MockMvc.postMockArticle(token: String): ResultActionsDsl {
+        val dto =
+            articlePostDTOFrom("Mocked Title", "mock article description", "mock article body", listOf("mocked-tag"))
+        return post("/articles") {
+            withAuthToken(token)
+            contentType = APPLICATION_JSON
+            content = mapper.writeValueAsString(dto)
         }
     }
 

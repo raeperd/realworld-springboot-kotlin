@@ -13,6 +13,10 @@ class ArticleJpaRepository(
     private val tagEntityRepository: TagEntityRepository
 ) : ArticleRepository {
 
+    override fun findArticleBySlug(slug: String): Article? {
+        return articleEntityRepository.findFirstBySlug(slug)
+    }
+
     override fun saveNewArticle(author: User, form: ArticleCreateForm): Article {
         if (author !is UserEntity) {
             throw IllegalArgumentException("Expected UserEntity but ${author.javaClass} given")
@@ -46,7 +50,9 @@ class ArticleJpaRepository(
     }
 }
 
-interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>
+interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long> {
+    fun findFirstBySlug(slug: String): ArticleEntity?
+}
 
 interface TagEntityRepository : JpaRepository<TagEntity, Long> {
     fun findAllByNameIsIn(names: Collection<String>): List<TagEntity>

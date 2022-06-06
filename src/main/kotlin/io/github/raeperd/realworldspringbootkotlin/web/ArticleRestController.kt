@@ -5,6 +5,8 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleCreateForm
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -22,6 +24,11 @@ class ArticleRestController(
             .toArticleDTO()
     }
 
+    @GetMapping("/articles/{slug}")
+    fun getArticlesBySlug(@PathVariable slug: String): ArticleDTO {
+        return articleService.findArticleBySlug(slug).toArticleDTO()
+    }
+
     private fun Article.toArticleDTO(): ArticleDTO =
         ArticleDTO(
             ArticleDTO.ArticleDTONested(
@@ -29,7 +36,7 @@ class ArticleRestController(
                 description = description,
                 body = body,
                 tagList = tagList.map { it.toString() },
-                slug = title,
+                slug = slug,
                 createdAt = createdAt,
                 updatedAt = updatedAt,
                 favorited = false,

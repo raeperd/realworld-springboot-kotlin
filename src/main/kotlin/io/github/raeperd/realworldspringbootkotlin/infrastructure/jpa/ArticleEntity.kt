@@ -2,6 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Tag
+import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -19,7 +20,7 @@ import javax.persistence.Table
 @Entity
 class ArticleEntity(
     @Id @GeneratedValue(strategy = IDENTITY)
-    var id: Long?,
+    var id: Long? = null,
 
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = EAGER)
@@ -36,12 +37,12 @@ class ArticleEntity(
     override var title: String,
     override var description: String,
     override var body: String,
+    override var slug: String = title.slugify(),
     @Column(name = "created_at", nullable = false)
     override val createdAt: Instant = Instant.now(),
     @Column(name = "updated_at", nullable = false)
     override val updatedAt: Instant = createdAt,
 ) : Article {
-
 }
 
 @Table(name = "tags")

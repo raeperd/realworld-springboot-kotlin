@@ -13,4 +13,9 @@ class ArticleService(
         return userRepository.findUserByIdOrThrow(authorId)
             .let { author -> articleRepository.saveNewArticle(author, form) }
     }
+
+    fun findArticleBySlug(slug: String): Article {
+        return articleRepository.findArticleBySlug(slug)
+            ?: throw NoSuchElementException("No such article with slug: $slug")
+    }
 }
