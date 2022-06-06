@@ -23,7 +23,7 @@ class ArticleEntity(
 
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = EAGER)
-    override var author: UserEntity,
+    override var author: ProfileEntity,
 
     @JoinTable(
         name = "articles_tags",

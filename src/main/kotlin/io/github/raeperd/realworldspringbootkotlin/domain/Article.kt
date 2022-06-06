@@ -7,7 +7,7 @@ interface Article {
     val description: String
     val body: String
     val tagList: List<Tag>
-    val author: User
+    val author: Profile
     val createdAt: Instant
     val updatedAt: Instant
 }
