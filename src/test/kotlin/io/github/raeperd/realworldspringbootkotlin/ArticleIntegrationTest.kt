@@ -1,19 +1,19 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.raeperd.realworldspringbootkotlin.domain.slugify
+import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
-import io.github.raeperd.realworldspringbootkotlin.util.responseJson
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
-import org.hamcrest.Matchers.emptyString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
-import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,9 +23,8 @@ import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.transaction.annotation.Transactional
 
-@Transactional
+@ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
 class ArticleIntegrationTest(
@@ -66,7 +65,7 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles/${articleDTO.article.slug}")
             .andExpect {
                 status { isOk() }
-                content { responseJson(articleDTO) }
+                content { validArticleDTO(articleDTO) }
             }
     }
 
@@ -84,7 +83,7 @@ class ArticleIntegrationTest(
         ArticlePostDTO(ArticlePostDTO.ArticlePostDTONested(title, description, body, tags))
 
     private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticlePostDTO, author: UserDTO) {
-        jsonPath("article.slug", not(emptyString()))
+        jsonPath("article.slug", equalTo(dto.article.title.slugify()))
         jsonPath("article.title", equalTo(dto.article.title))
         jsonPath("article.description", equalTo(dto.article.description))
         jsonPath("article.body", equalTo(dto.article.body))
@@ -97,5 +96,21 @@ class ArticleIntegrationTest(
         jsonPath("article.author.bio", equalTo(author.user.bio))
         jsonPath("article.author.image", equalTo(author.user.image))
         jsonPath("article.author.following", equalTo(false))
+    }
+
+    private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
+        jsonPath("article.slug", equalTo(dto.article.slug))
+        jsonPath("article.title", equalTo(dto.article.title))
+        jsonPath("article.description", equalTo(dto.article.description))
+        jsonPath("article.body", equalTo(dto.article.body))
+        jsonPath("article.tagList", equalTo(dto.article.tagList))
+        jsonPath("article.createdAt", matchesPattern(datePattern))
+        jsonPath("article.updatedAt", matchesPattern(datePattern))
+        jsonPath("article.favorited", equalTo(dto.article.favorited))
+        jsonPath("article.favoritesCount", equalTo(dto.article.favoritesCount))
+        jsonPath("article.author.username", equalTo(dto.article.author.username))
+        jsonPath("article.author.bio", equalTo(dto.article.author.bio))
+        jsonPath("article.author.image", equalTo(dto.article.author.image))
+        jsonPath("article.author.following", equalTo(dto.article.author.following))
     }
 }

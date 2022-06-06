@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.MockUser
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnUserToken
@@ -12,6 +13,7 @@ import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -19,15 +21,14 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.transaction.annotation.Transactional
 
+@ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
 class ProfileIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper
 ) {
-    @Transactional
     @Test
     fun `when get profile expect valid json response`() {
         mockMvc.get("/profiles/invalid-username")
@@ -45,7 +46,6 @@ class ProfileIntegrationTest(
             }
     }
 
-    @Transactional
     @Test
     fun `when post profiles follow expect return valid profile`() {
         val token = mockMvc.postMockUser().andReturnUserToken()
