@@ -13,11 +13,14 @@ internal class UserEntityTest {
 
     @Test
     fun `expect equals and hashcode works by username`(@Mock password: Password, @Mock userMock: User) {
-        val user = UserEntity(null, "user@email.com", "username", password, null, "bio")
+        val user =
+            UserEntity(email = "user@email.com", username = "username", password = password, bio = "bio", image = "")
         val userWithSameUsername = UserEntity(
-            null, "other@email.com",
-            user.username,
-            password, "image", "other-bio"
+            username = user.username,
+            image = "image",
+            bio = "other-bio",
+            email = "other@email.com",
+            password = password,
         )
 
         assertThat(user).isNotEqualTo(null)
@@ -30,5 +33,9 @@ internal class UserEntityTest {
     }
 
     private fun UserEntity.withDifferentUsername(username: String): UserEntity =
-        UserEntity(id, email, username, password, image, bio)
+        UserEntity(
+            id = id,
+            email = email,
+            username = username, password = password, image = image, bio = bio
+        )
 }

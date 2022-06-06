@@ -34,7 +34,7 @@ class ArticleRestController(
                 updatedAt = updatedAt,
                 favorited = false,
                 favoritesCount = 0,
-                author = author.viewUserProfile(author).toProfileDTO().profile
+                author = author.toProfileDTO().profile
             )
         )
 }
