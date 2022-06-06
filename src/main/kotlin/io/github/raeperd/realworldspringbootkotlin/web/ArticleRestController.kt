@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDateTime
+import java.time.Instant
 
 @RestController
 class ArticleRestController(
@@ -29,11 +29,11 @@ class ArticleRestController(
                 description = description,
                 body = body,
                 tagList = tagList.map { it.toString() },
-                slug = "",
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
+                slug = title,
+                createdAt = createdAt,
+                updatedAt = updatedAt,
                 favorited = false,
-                favoritedCount = 0,
+                favoritesCount = 0,
                 author = author.viewUserProfile(author).toProfileDTO().profile
             )
         )
@@ -46,14 +46,14 @@ data class ArticlePostDTO(
         val title: String,
         val description: String,
         val body: String,
-        val tags: List<String>
+        val tagList: List<String>
     )
 
     fun toArticleCreateForm() = ArticleCreateForm(
         title = article.title,
         description = article.description,
         body = article.body,
-        tagList = article.tags
+        tagList = article.tagList
     )
 }
 
@@ -66,10 +66,10 @@ data class ArticleDTO(
         val description: String,
         val body: String,
         val tagList: List<String>,
-        val createdAt: LocalDateTime,
-        val updatedAt: LocalDateTime,
+        val createdAt: Instant,
+        val updatedAt: Instant,
         val favorited: Boolean,
-        val favoritedCount: Int,
+        val favoritesCount: Int,
         val author: ProfileDTO.ProfileDTONested
     )
 }
