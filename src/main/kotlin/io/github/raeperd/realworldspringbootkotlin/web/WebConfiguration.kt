@@ -35,7 +35,8 @@ class WebConfiguration : WebMvcConfigurer {
             allowList = setOf(
                 HttpRequestMeta(POST, "/users"),
                 HttpRequestMeta(POST, "/users/login"),
-                HttpRequestMeta(GET, "/profiles")
+                HttpRequestMeta(GET, "/profiles"),
+                HttpRequestMeta(GET, "/articles")
             ),
             mapper = mapper
         )
