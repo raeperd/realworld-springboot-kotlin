@@ -3,13 +3,17 @@ package io.github.raeperd.realworldspringbootkotlin.domain
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
-interface User {
-    val id: Long?
-    var email: String
+interface Profile {
     var username: String
-    var password: Password
     var image: String?
     var bio: String
+    var following: Boolean
+}
+
+interface User : Profile {
+    val id: Long?
+    var email: String
+    var password: Password
     fun viewUserProfile(user: User): Profile
     fun followUser(userToFollow: User)
     fun unfollowUser(userToUnFollow: User)

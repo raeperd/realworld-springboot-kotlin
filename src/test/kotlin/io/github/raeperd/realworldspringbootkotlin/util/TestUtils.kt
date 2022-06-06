@@ -25,6 +25,9 @@ object MockUser : User {
     override var bio: String
         get() = ""
         set(value) {}
+    override var following: Boolean
+        get() = false
+        set(value) {}
 
     override fun viewUserProfile(user: User): Profile {
         throw NotImplementedError()
