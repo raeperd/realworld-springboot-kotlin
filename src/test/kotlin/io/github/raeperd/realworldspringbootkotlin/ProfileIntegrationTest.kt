@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.MockUser
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
@@ -10,7 +11,7 @@ import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.util.postUsers
 import io.github.raeperd.realworldspringbootkotlin.util.responseJson
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
-import io.github.raeperd.realworldspringbootkotlin.web.ProfileDTO
+import io.github.raeperd.realworldspringbootkotlin.web.ProfileModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -42,7 +43,7 @@ class ProfileIntegrationTest(
         mockMvc.get("/profiles/${MockUser.username}")
             .andExpect {
                 status { isOk() }
-                content { json(mapper.writeValueAsString(mockUserProfileDTO)) }
+                content { json(mapper.writeValueAsString(mockProfileModel)) }
             }
     }
 
@@ -75,13 +76,17 @@ class ProfileIntegrationTest(
         }.andExpect { content { responseJson(dto.toProfileDTOWithFollowing(false)) } }
     }
 
-    private val mockUserProfileDTO = ProfileDTO(
-        MockUser.username,
-        MockUser.bio,
-        MockUser.image,
-        false
+    private val mockProfileModel = ProfileModel(
+        ProfileDTO(
+            MockUser.username, MockUser.bio, MockUser.image,
+            false
+        )
     )
 
-    private fun UserModel.toProfileDTOWithFollowing(following: Boolean) =
-        ProfileDTO(user.username, user.bio, user.image, following)
+    private fun UserModel.toProfileDTOWithFollowing(following: Boolean) = ProfileModel(
+        ProfileDTO(
+            user.username, user.bio, user.image,
+            following
+        )
+    )
 }

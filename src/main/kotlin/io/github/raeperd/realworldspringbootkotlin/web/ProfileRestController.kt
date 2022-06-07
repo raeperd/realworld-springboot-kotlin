@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
-import io.github.raeperd.realworldspringbootkotlin.domain.Profile
+import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,45 +14,29 @@ class ProfileRestController(
     private val profileService: ProfileService
 ) {
     @GetMapping("/profiles/{username}")
-    fun getProfiles(@PathVariable username: String, payload: JWTPayload?): ProfileDTO {
+    fun getProfiles(@PathVariable username: String, payload: JWTPayload?): ProfileModel {
         return (if (payload != null) {
             profileService.viewUserProfile(payload.sub, username)
         } else {
             profileService.getUserProfile(username)
-        }).toProfileDTO()
+        }).toProfileModel()
     }
 
     @PostMapping("/profiles/{username}/follow")
-    fun postProfilesFollow(@PathVariable username: String, payload: JWTPayload): ProfileDTO {
+    fun postProfilesFollow(@PathVariable username: String, payload: JWTPayload): ProfileModel {
         return profileService.followUser(payload.sub, username)
-            .toProfileDTO()
+            .toProfileModel()
     }
 
     @DeleteMapping("/profiles/{username}/follow")
-    fun deleteProfilesFollow(@PathVariable username: String, payload: JWTPayload): ProfileDTO {
+    fun deleteProfilesFollow(@PathVariable username: String, payload: JWTPayload): ProfileModel {
         return profileService.unfollowUser(payload.sub, username)
-            .toProfileDTO()
+            .toProfileModel()
     }
 }
 
-data class ProfileDTO(
-    val profile: ProfileDTONested
-) {
-    constructor(username: String, bio: String, image: String?, following: Boolean) : this(
-        ProfileDTONested(
-            username,
-            bio,
-            image,
-            following
-        )
-    )
+data class ProfileModel(
+    val profile: ProfileDTO
+)
 
-    data class ProfileDTONested(
-        val username: String,
-        val bio: String,
-        val image: String?,
-        val following: Boolean
-    )
-}
-
-fun Profile.toProfileDTO() = ProfileDTO(username, bio, image, following)
+fun ProfileDTO.toProfileModel() = ProfileModel(this)

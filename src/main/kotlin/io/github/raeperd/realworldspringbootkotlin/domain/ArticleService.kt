@@ -1,6 +1,5 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
-import io.github.raeperd.realworldspringbootkotlin.web.ProfileDTO.ProfileDTONested
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -39,7 +38,7 @@ class ArticleService(
             description = description,
             body = body,
             tagList = tagList.map { it.toString() },
-            author = author.toProfileDTONested(),
+            author = author.toProfileDTO(),
             createdAt = createdAt,
             updatedAt = updatedAt,
             favoritesCount = favoritesCount,
@@ -54,7 +53,7 @@ class ArticleService(
             description = description,
             body = body,
             tagList = tagList.map { it.toString() },
-            author = author.toProfileDTONested(),
+            author = author.toProfileDTO(),
             createdAt = createdAt,
             updatedAt = updatedAt,
             favoritesCount = favoritesCount,
@@ -69,11 +68,9 @@ data class ArticleDTO(
     val description: String,
     val body: String,
     val tagList: List<String>,
-    val author: ProfileDTONested,
+    val author: ProfileDTO,
     val createdAt: Instant,
     val updatedAt: Instant,
     val favoritesCount: Int,
     val favorited: Boolean
 )
-
-private fun Profile.toProfileDTONested() = ProfileDTONested(username, bio, image, following)
