@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.util
 
+import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
@@ -38,6 +39,10 @@ object MockUser : User {
     }
 
     override fun unfollowUser(userToUnFollow: User) {
+        throw NotImplementedError()
+    }
+
+    override fun favoriteArticle(article: Article) {
         throw NotImplementedError()
     }
 }

@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleCreateForm
+import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 class ArticleRestController(
@@ -19,31 +18,22 @@ class ArticleRestController(
 ) {
     @ResponseStatus(CREATED)
     @PostMapping("/articles")
-    fun postArticles(payload: JWTPayload, @RequestBody dto: ArticlePostDTO): ArticleDTO {
+    fun postArticles(payload: JWTPayload, @RequestBody dto: ArticlePostDTO): ArticleModel {
         return articleService.saveNewUserArticle(payload.sub, dto.toArticleCreateForm())
-            .toArticleDTO()
+            .toArticleModel()
     }
 
     @GetMapping("/articles/{slug}")
-    fun getArticlesBySlug(@PathVariable slug: String): ArticleDTO {
-        return articleService.findArticleBySlug(slug).toArticleDTO()
+    fun getArticlesBySlug(@PathVariable slug: String, payload: JWTPayload?): ArticleModel {
+        return articleService.findArticleBySlug(payload?.sub, slug).toArticleModel()
     }
 
-    private fun Article.toArticleDTO(): ArticleDTO =
-        ArticleDTO(
-            ArticleDTO.ArticleDTONested(
-                title = title,
-                description = description,
-                body = body,
-                tagList = tagList.map { it.toString() },
-                slug = slug,
-                createdAt = createdAt,
-                updatedAt = updatedAt,
-                favorited = false,
-                favoritesCount = 0,
-                author = author.toProfileDTO().profile
-            )
-        )
+    @PostMapping("/articles/{slug}/favorite")
+    fun postArticlesBySlugFavorite(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
+        return articleService.favoriteArticle(payload.sub, slug).toArticleModel()
+    }
+
+    private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
 }
 
 data class ArticlePostDTO(
@@ -64,19 +54,4 @@ data class ArticlePostDTO(
     )
 }
 
-data class ArticleDTO(
-    val article: ArticleDTONested
-) {
-    data class ArticleDTONested(
-        val slug: String,
-        val title: String,
-        val description: String,
-        val body: String,
-        val tagList: List<String>,
-        val createdAt: Instant,
-        val updatedAt: Instant,
-        val favorited: Boolean,
-        val favoritesCount: Int,
-        val author: ProfileDTO.ProfileDTONested
-    )
-}
+data class ArticleModel(val article: ArticleDTO)
