@@ -45,3 +45,12 @@ create table if not exists articles_tags
     constraint fk_article foreign key (article_id) references articles (id) on delete cascade,
     constraint fk_tag foreign key (tag_id) references tags (id) on delete cascade
 );
+
+create table if not exists article_favorites
+(
+    article_id BIGINT NOT NULL,
+    user_id    BIGINT NOT NULL,
+    PRIMARY KEY (article_id, user_id),
+    CONSTRAINT fk_article_favorited FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);

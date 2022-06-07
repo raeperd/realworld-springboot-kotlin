@@ -26,6 +26,13 @@ class ArticleJpaRepository(
             .let { article -> articleEntityRepository.save(article) }
     }
 
+    override fun saveArticle(article: Article): Article {
+        if (article !is ArticleEntity) {
+            throw IllegalArgumentException("Expected ArticleEntity but ${article.javaClass} given")
+        }
+        return articleEntityRepository.save(article)
+    }
+
     private fun TagEntityRepository.findOrSaveAllTagsByName(names: List<String>): List<TagEntity> {
         val tagsFound = findAllByNameIsIn(names)
         if (tagsFound.size == names.size) {

@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
+import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
@@ -47,6 +48,10 @@ class UserEntity(
             throw IllegalArgumentException("Expected UserEntity but given ${userToUnFollow.javaClass}")
         }
         followingUsers.remove(userToUnFollow)
+    }
+
+    override fun favoriteArticle(article: Article) {
+        article.addFavoritedUser(this)
     }
 
     override fun equals(other: Any?): Boolean {

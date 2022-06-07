@@ -12,9 +12,10 @@ import org.springframework.context.annotation.Import
 
 @Import(JpaConfiguration::class)
 @DataJpaTest
-class ArticleEntityRepositoryTest(
-    @Autowired val userRepository: UserRepository,
-    @Autowired val testEntityManager: TestEntityManager
+class ArticleEntityRepositoryTest @Autowired constructor(
+    private val userRepository: UserRepository,
+    private val articleRepository: ArticleEntityRepository,
+    private val testEntityManager: TestEntityManager,
 ) {
     @Test
     fun `when save new article with user expect to be persisted`() {
@@ -36,6 +37,31 @@ class ArticleEntityRepositoryTest(
         testEntityManager.persist(tag2)
     }
 
+    @Test
+    fun `when user favorite article expect persisted`() {
+        val user = userRepository.saveMockUser()
+
+        val articleSaved = articleRepository.saveMockArticle(user)
+            .let { article ->
+                user.favoriteArticle(article)
+                article
+            }.let { articleUpdated -> articleRepository.save(articleUpdated) }
+
+        assertThat(articleSaved.isFavoritedByUser(user)).isTrue
+    }
+
     private fun UserRepository.saveMockUser() =
         saveNewUser(MockUser.email, MockUser.username, Password("password")) as UserEntity
+
+    private fun ArticleEntityRepository.saveMockArticle(user: UserEntity) =
+        save(
+            ArticleEntity(
+                id = null,
+                author = user,
+                tagList = mutableListOf(),
+                "Mock title",
+                "Mock description",
+                "Mock Body",
+            )
+        )
 }

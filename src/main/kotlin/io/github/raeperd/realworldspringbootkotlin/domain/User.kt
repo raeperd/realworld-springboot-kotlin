@@ -17,6 +17,7 @@ interface User : Profile {
     fun viewUserProfile(user: User): Profile
     fun followUser(userToFollow: User)
     fun unfollowUser(userToUnFollow: User)
+    fun favoriteArticle(article: Article)
 }
 
 @Embeddable

@@ -14,6 +14,9 @@ interface Article {
     val author: Profile
     val createdAt: Instant
     val updatedAt: Instant
+    val favoritesCount: Int
+    fun addFavoritedUser(user: User)
+    fun isFavoritedByUser(user: User): Boolean
 }
 
 fun String.slugify(): String = normalize(this, NFD)
@@ -28,7 +31,11 @@ interface Tag {
 
 interface ArticleRepository {
     fun findArticleBySlug(slug: String): Article?
+    fun findArticleBySlugOrThrow(slug: String): Article =
+        findArticleBySlug(slug) ?: throw NoSuchElementException("No such article with slug: $slug")
+
     fun saveNewArticle(author: User, form: ArticleCreateForm): Article
+    fun saveArticle(article: Article): Article
 }
 
 data class ArticleCreateForm(

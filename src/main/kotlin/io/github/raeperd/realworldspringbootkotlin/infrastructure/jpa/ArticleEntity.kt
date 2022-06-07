@@ -2,9 +2,12 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Tag
+import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import java.time.Instant
+import javax.persistence.CollectionTable
 import javax.persistence.Column
+import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.FetchType.EAGER
 import javax.persistence.GeneratedValue
@@ -43,6 +46,20 @@ class ArticleEntity(
     @Column(name = "updated_at", nullable = false)
     override val updatedAt: Instant = createdAt,
 ) : Article {
+
+    override val favoritesCount: Int
+        get() = userFavorited.size
+
+    override fun addFavoritedUser(user: User) {
+        user.id?.let { userId -> userFavorited.add(userId) }
+    }
+
+    override fun isFavoritedByUser(user: User) = userFavorited.contains(user.id)
+
+    @ElementCollection
+    @CollectionTable(name = "article_favorites", joinColumns = [JoinColumn(name = "article_id")])
+    @Column(name = "user_id")
+    private val userFavorited: MutableList<Long> = mutableListOf()
 }
 
 @Table(name = "tags")
