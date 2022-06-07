@@ -9,7 +9,7 @@ import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
-import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Test
@@ -37,7 +37,7 @@ class ArticleIntegrationTest(
 
     @Test
     fun `when post articles expect return valid json`() {
-        val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
+        val author = mockMvc.postMockUser().andReturnResponseBody<UserModel>()
         val dto = articlePostDTOFrom("Some title", "Some description", "Some body", listOf("tag1", "tag2"))
 
         mockMvc.post("/articles") {
@@ -52,7 +52,7 @@ class ArticleIntegrationTest(
 
     @Test
     fun `when get articles by slug expect return valid json`() {
-        val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
+        val author = mockMvc.postMockUser().andReturnResponseBody<UserModel>()
         val articleModel = mockMvc.postMockArticle(author.user.token)
             .andReturnResponseBody<ArticleModel>()
 
@@ -71,7 +71,7 @@ class ArticleIntegrationTest(
 
     @Test
     fun `when post favorites article expect return valid json`() {
-        val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
+        val author = mockMvc.postMockUser().andReturnResponseBody<UserModel>()
         val articleModel = mockMvc.postMockArticle(author.user.token)
             .andReturnResponseBody<ArticleModel>()
         val dtoExpected = ArticleModel(articleModel.article.copy(favorited = true, favoritesCount = 1))
@@ -104,7 +104,7 @@ class ArticleIntegrationTest(
     private fun articlePostDTOFrom(title: String, description: String, body: String, tags: List<String>) =
         ArticlePostDTO(ArticlePostDTO.ArticlePostDTONested(title, description, body, tags))
 
-    private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticlePostDTO, author: UserDTO) {
+    private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticlePostDTO, author: UserModel) {
         jsonPath("article.slug", equalTo(dto.article.title.slugify()))
         jsonPath("article.title", equalTo(dto.article.title))
         jsonPath("article.description", equalTo(dto.article.description))

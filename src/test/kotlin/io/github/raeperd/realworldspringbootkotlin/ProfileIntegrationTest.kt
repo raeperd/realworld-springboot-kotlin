@@ -11,7 +11,7 @@ import io.github.raeperd.realworldspringbootkotlin.util.postUsers
 import io.github.raeperd.realworldspringbootkotlin.util.responseJson
 import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileDTO
-import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,7 +50,7 @@ class ProfileIntegrationTest(
     fun `when post profiles follow expect return valid profile`() {
         val token = mockMvc.postMockUser().andReturnUserToken()
         val dto = mockMvc.postUsers("celeb@email.com", "password", "celeb")
-            .andReturnResponseBody<UserDTO>()
+            .andReturnResponseBody<UserModel>()
 
         mockMvc.post("/profiles/${dto.user.username}/follow") {
             withAuthToken(token)
@@ -82,6 +82,6 @@ class ProfileIntegrationTest(
         false
     )
 
-    private fun UserDTO.toProfileDTOWithFollowing(following: Boolean) =
+    private fun UserModel.toProfileDTOWithFollowing(following: Boolean) =
         ProfileDTO(user.username, user.bio, user.image, following)
 }

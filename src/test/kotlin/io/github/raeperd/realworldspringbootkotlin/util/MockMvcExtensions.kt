@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.github.raeperd.realworldspringbootkotlin.web.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import org.hamcrest.Matchers
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -56,7 +56,7 @@ fun <T> ContentResultMatchersDsl.responseJson(dto: T) {
 }
 
 fun ResultActionsDsl.andReturnUserToken(): String {
-    return andReturnResponseBody<UserDTO>()
+    return andReturnResponseBody<UserModel>()
         .user.token
 }
 
