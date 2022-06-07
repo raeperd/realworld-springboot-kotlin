@@ -24,8 +24,8 @@ class ArticleRestController(
     }
 
     @GetMapping("/articles/{slug}")
-    fun getArticlesBySlug(@PathVariable slug: String): ArticleModel {
-        return articleService.findArticleBySlug(slug).toArticleModel()
+    fun getArticlesBySlug(@PathVariable slug: String, payload: JWTPayload?): ArticleModel {
+        return articleService.findArticleBySlug(payload?.sub, slug).toArticleModel()
     }
 
     @PostMapping("/articles/{slug}/favorite")

@@ -17,9 +17,11 @@ class ArticleService(
             .toArticleDTO()
     }
 
-    fun findArticleBySlug(slug: String): ArticleDTO {
-        return articleRepository.findArticleBySlugOrThrow(slug)
-            .toArticleDTO()
+    fun findArticleBySlug(userId: Long?, slug: String): ArticleDTO {
+        val article = articleRepository.findArticleBySlugOrThrow(slug)
+        return userId?.let { id -> userRepository.findUserByIdOrThrow(id) }
+            ?.let { user -> article.toArticleDTO(user) }
+            ?: article.toArticleDTO()
     }
 
     fun favoriteArticle(userId: Long, slug: String): ArticleDTO {
