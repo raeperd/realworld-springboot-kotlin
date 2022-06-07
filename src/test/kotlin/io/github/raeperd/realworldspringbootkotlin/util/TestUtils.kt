@@ -45,6 +45,10 @@ object MockUser : User {
     override fun favoriteArticle(article: Article) {
         throw NotImplementedError()
     }
+
+    override fun unfavoriteArticle(article: Article) {
+        throw NotImplementedError()
+    }
 }
 
 fun MockMvc.postMockUser() = postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username)

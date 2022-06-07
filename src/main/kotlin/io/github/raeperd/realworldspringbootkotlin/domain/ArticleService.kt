@@ -31,6 +31,17 @@ class ArticleService(
             .toArticleDTO(user)
     }
 
+    fun unfavoriteArticle(userId: Long, slug: String): ArticleDTO {
+        val user = userRepository.findUserByIdOrThrow(userId)
+        val article = articleRepository.findArticleBySlugOrThrow(slug)
+        if (!article.isFavoritedByUser(user)) {
+            return article.toArticleDTO()
+        }
+        user.unfavoriteArticle(article)
+        return articleRepository.saveArticle(article)
+            .toArticleDTO(user)
+    }
+
     private fun Article.toArticleDTO(user: User): ArticleDTO {
         return ArticleDTO(
             slug = slug,

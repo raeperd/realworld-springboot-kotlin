@@ -54,6 +54,10 @@ class UserEntity(
         article.addFavoritedUser(this)
     }
 
+    override fun unfavoriteArticle(article: Article) {
+        article.removeFavoritedByUser(this)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) {
             return true

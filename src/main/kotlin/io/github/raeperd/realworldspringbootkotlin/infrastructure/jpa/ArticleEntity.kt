@@ -54,6 +54,10 @@ class ArticleEntity(
         user.id?.let { userId -> userFavorited.add(userId) }
     }
 
+    override fun removeFavoritedByUser(user: User) {
+        user.id?.let { userId -> userFavorited.remove(userId) }
+    }
+
     override fun isFavoritedByUser(user: User) = userFavorited.contains(user.id)
 
     @ElementCollection
