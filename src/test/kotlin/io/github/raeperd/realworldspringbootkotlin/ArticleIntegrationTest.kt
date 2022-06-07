@@ -65,8 +65,30 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles/${articleDTO.article.slug}")
             .andExpect {
                 status { isOk() }
-                content { validArticleDTO(articleDTO) }
+                content { validArticleDTO(articleDTO.article) }
             }
+    }
+
+    @Test
+    fun `when post favorites article expect return valid json`() {
+        val author = mockMvc.postMockUser().andReturnResponseBody<UserDTO>()
+        val articleDTO = mockMvc.postMockArticle(author.user.token)
+            .andReturnResponseBody<ArticleDTO>()
+        val dtoExpected = articleDTO.article.copy(favorited = true, favoritesCount = 1)
+
+        mockMvc.post("/articles/${articleDTO.article.slug}/favorite") {
+            withAuthToken(author.user.token)
+        }.andExpect {
+            status { isOk() }
+            content { validArticleDTO(dtoExpected) }
+        }
+
+        mockMvc.get("/articles/${articleDTO.article.slug}") {
+            withAuthToken(author.user.token)
+        }.andExpect {
+            status { isOk() }
+            content { validArticleDTO(dtoExpected) }
+        }
     }
 
     private fun MockMvc.postMockArticle(token: String): ResultActionsDsl {
@@ -98,19 +120,19 @@ class ArticleIntegrationTest(
         jsonPath("article.author.following", equalTo(false))
     }
 
-    private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
-        jsonPath("article.slug", equalTo(dto.article.slug))
-        jsonPath("article.title", equalTo(dto.article.title))
-        jsonPath("article.description", equalTo(dto.article.description))
-        jsonPath("article.body", equalTo(dto.article.body))
-        jsonPath("article.tagList", equalTo(dto.article.tagList))
+    private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO.ArticleDTONested) {
+        jsonPath("article.slug", equalTo(dto.slug))
+        jsonPath("article.title", equalTo(dto.title))
+        jsonPath("article.description", equalTo(dto.description))
+        jsonPath("article.body", equalTo(dto.body))
+        jsonPath("article.tagList", equalTo(dto.tagList))
         jsonPath("article.createdAt", matchesPattern(datePattern))
         jsonPath("article.updatedAt", matchesPattern(datePattern))
-        jsonPath("article.favorited", equalTo(dto.article.favorited))
-        jsonPath("article.favoritesCount", equalTo(dto.article.favoritesCount))
-        jsonPath("article.author.username", equalTo(dto.article.author.username))
-        jsonPath("article.author.bio", equalTo(dto.article.author.bio))
-        jsonPath("article.author.image", equalTo(dto.article.author.image))
-        jsonPath("article.author.following", equalTo(dto.article.author.following))
+        jsonPath("article.favorited", equalTo(dto.favorited))
+        jsonPath("article.favoritesCount", equalTo(dto.favoritesCount))
+        jsonPath("article.author.username", equalTo(dto.author.username))
+        jsonPath("article.author.bio", equalTo(dto.author.bio))
+        jsonPath("article.author.image", equalTo(dto.author.image))
+        jsonPath("article.author.following", equalTo(dto.author.following))
     }
 }
