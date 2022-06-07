@@ -5,6 +5,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,8 +30,13 @@ class ArticleRestController(
     }
 
     @PostMapping("/articles/{slug}/favorite")
-    fun postArticlesBySlugFavorite(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
+    fun postArticleFavoriteBySlug(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
         return articleService.favoriteArticle(payload.sub, slug).toArticleModel()
+    }
+
+    @DeleteMapping("/articles/{slug}/favorite")
+    fun deleteArticleFavoriteBySlug(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
+        return articleService.unfavoriteArticle(payload.sub, slug).toArticleModel()
     }
 
     private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)

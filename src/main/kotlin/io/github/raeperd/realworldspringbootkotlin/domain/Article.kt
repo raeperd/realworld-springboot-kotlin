@@ -16,6 +16,7 @@ interface Article {
     val updatedAt: Instant
     val favoritesCount: Int
     fun addFavoritedUser(user: User)
+    fun removeFavoritedByUser(user: User)
     fun isFavoritedByUser(user: User): Boolean
 }
 
