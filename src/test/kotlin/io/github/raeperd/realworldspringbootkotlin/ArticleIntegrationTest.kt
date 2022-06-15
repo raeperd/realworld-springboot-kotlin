@@ -56,8 +56,8 @@ class ArticleIntegrationTest(
 
     @Test
     fun `when get articles by slug expect return valid json`() {
-        val author = mockMvc.postMockUser().andReturnResponseBody<UserModel>()
-        val articleDto = mockMvc.postMockArticle(author.user.token)
+        val userDto = mockMvc.postMockUser().andReturnResponseBody<UserModel>().user
+        val articleDto = mockMvc.postMockArticle(userDto.token)
             .andReturnResponseBody<ArticleModel>().article
 
         mockMvc.get("/articles/not-exists-slug")
@@ -70,6 +70,18 @@ class ArticleIntegrationTest(
             .andExpect {
                 status { isOk() }
                 content { validArticleDTO(articleDto) }
+            }
+
+        mockMvc.delete("/articles/${articleDto.slug}") {
+            withAuthToken(userDto.token)
+        }.andExpect {
+            status { isNoContent() }
+        }
+
+        mockMvc.get("/articles/${articleDto.slug}")
+            .andExpect {
+                status { isNotFound() }
+                content { notEmptyErrorResponse() }
             }
     }
 
