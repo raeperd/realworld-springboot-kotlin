@@ -23,6 +23,15 @@ class ArticleService(
             ?: article.toArticleDTO()
     }
 
+    fun deleteArticleBySlug(userId: Long, slug: String) {
+        val article = articleRepository.findArticleBySlugOrThrow(slug)
+        val user = userRepository.findUserByIdOrThrow(userId)
+        if (article.author.username != user.username) {
+            throw NotAuthorizedException("User ${user.username} not authorized to delete article ${article.slug}")
+        }
+        articleRepository.deleteArticle(article)
+    }
+
     fun favoriteArticle(userId: Long, slug: String): ArticleDTO {
         val user = userRepository.findUserByIdOrThrow(userId)
         val article = articleRepository.findArticleBySlugOrThrow(slug)

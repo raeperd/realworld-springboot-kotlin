@@ -1,8 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import org.springframework.http.HttpStatus.BAD_REQUEST
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
-import org.springframework.http.HttpStatus.NOT_FOUND
+import io.github.raeperd.realworldspringbootkotlin.domain.NotAuthorizedException
+import org.springframework.http.HttpStatus.*
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -19,6 +18,12 @@ class RestControllerAdvice {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(exception: IllegalArgumentException): ErrorResponseDTO {
+        return ErrorResponseDTO(exception)
+    }
+
+    @ResponseStatus(FORBIDDEN)
+    @ExceptionHandler(NotAuthorizedException::class)
+    fun handleNotAuthorizedException(exception: NotAuthorizedException): ErrorResponseDTO {
         return ErrorResponseDTO(exception)
     }
 
