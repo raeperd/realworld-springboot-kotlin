@@ -46,6 +46,10 @@ class ArticleIntegrationTest(
                 content { validArticleDTO(articleDto) }
             }
 
+        val viewer = mockMvc.postMockUser("viewer")
+        mockMvc.deleteArticleBySlug(postDto.slug, viewer)
+            .andExpect { status { isForbidden() } }
+
         mockMvc.deleteArticleBySlug(postDto.slug, author)
             .andExpect { status { isNoContent() } }
 
