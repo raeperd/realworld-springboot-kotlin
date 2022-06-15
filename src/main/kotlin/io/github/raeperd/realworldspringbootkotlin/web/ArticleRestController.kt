@@ -5,6 +5,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,6 +28,12 @@ class ArticleRestController(
     @GetMapping("/articles/{slug}")
     fun getArticlesBySlug(@PathVariable slug: String, payload: JWTPayload?): ArticleModel {
         return articleService.findArticleBySlug(payload?.sub, slug).toArticleModel()
+    }
+
+    @ResponseStatus(NO_CONTENT)
+    @DeleteMapping("/articles/{slug}")
+    fun deleteArticlesBySlug(@PathVariable slug: String, payload: JWTPayload) {
+        articleService.deleteArticleBySlug(payload.sub, slug)
     }
 
     @PostMapping("/articles/{slug}/favorite")

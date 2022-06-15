@@ -17,6 +17,13 @@ class ArticleJpaRepository(
         return articleEntityRepository.findFirstBySlug(slug)
     }
 
+    override fun deleteArticle(article: Article) {
+        if (article !is ArticleEntity) {
+            handleIllegalArticleArgument(article)
+        }
+        articleEntityRepository.delete(article)
+    }
+
     override fun saveNewArticle(author: User, form: ArticleCreateForm): Article {
         if (author !is UserEntity) {
             throw IllegalArgumentException("Expected UserEntity but ${author.javaClass} given")
@@ -28,9 +35,13 @@ class ArticleJpaRepository(
 
     override fun saveArticle(article: Article): Article {
         if (article !is ArticleEntity) {
-            throw IllegalArgumentException("Expected ArticleEntity but ${article.javaClass} given")
+            handleIllegalArticleArgument(article)
         }
         return articleEntityRepository.save(article)
+    }
+
+    private fun handleIllegalArticleArgument(article: Article): Nothing {
+        throw IllegalArgumentException("Expected ArticleEntity but ${article.javaClass} given")
     }
 
     private fun TagEntityRepository.findOrSaveAllTagsByName(names: List<String>): List<TagEntity> {

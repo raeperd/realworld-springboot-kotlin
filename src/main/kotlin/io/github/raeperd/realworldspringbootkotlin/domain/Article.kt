@@ -35,6 +35,7 @@ interface ArticleRepository {
     fun findArticleBySlugOrThrow(slug: String): Article =
         findArticleBySlug(slug) ?: throw NoSuchElementException("No such article with slug: $slug")
 
+    fun deleteArticle(article: Article)
     fun saveNewArticle(author: User, form: ArticleCreateForm): Article
     fun saveArticle(article: Article): Article
 }
