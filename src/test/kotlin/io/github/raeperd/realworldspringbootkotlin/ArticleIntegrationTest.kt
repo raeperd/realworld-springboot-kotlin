@@ -76,7 +76,7 @@ fun MockMvc.postArticles(author: UserDTO, dto: ArticlePostDTO): ResultActionsDsl
         withAuthToken(author.token)
         contentType = APPLICATION_JSON
         accept = APPLICATION_JSON
-        content = SingletonObjectMapper.writeValueAsString(dto)
+        content = dto.toJson()
     }
 
 fun MockMvc.getArticlesBySlug(slug: String, user: UserDTO? = null): ResultActionsDsl =
