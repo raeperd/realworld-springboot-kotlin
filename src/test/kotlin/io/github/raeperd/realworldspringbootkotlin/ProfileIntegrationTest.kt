@@ -2,15 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.MockUser
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnUserToken
-import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
-import io.github.raeperd.realworldspringbootkotlin.util.postUsers
-import io.github.raeperd.realworldspringbootkotlin.util.responseJson
-import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
+import io.github.raeperd.realworldspringbootkotlin.util.*
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import org.junit.jupiter.api.Test

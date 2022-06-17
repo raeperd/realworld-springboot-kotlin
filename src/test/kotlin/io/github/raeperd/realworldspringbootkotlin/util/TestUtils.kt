@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.raeperd.realworldspringbootkotlin.domain.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.postUsers
+import org.hamcrest.Matchers
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
+import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.result.ContentResultMatchersDsl
 
 object SingletonObjectMapper : ObjectMapper() {
     init {
@@ -76,3 +82,15 @@ object MockUser : User {
 }
 
 fun MockMvc.postMockUser() = postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username)
+fun MockMvcResultMatchersDsl.notEmptyErrorResponse() {
+    return jsonPath("errors.body", Matchers.not(emptyList<String>()))
+}
+
+fun <T> ContentResultMatchersDsl.responseJson(dto: T) {
+    json(dto.toJson())
+}
+
+inline fun <reified T> ResultActionsDsl.andReturnResponseBody(): T {
+    return andReturn().response.contentAsString
+        .let { SingletonObjectMapper.readValue(it) }
+}

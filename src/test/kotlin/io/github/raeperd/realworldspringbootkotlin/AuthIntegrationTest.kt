@@ -1,30 +1,20 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.MockUser
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnUserToken
-import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
-import io.github.raeperd.realworldspringbootkotlin.util.postUsers
-import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
+import io.github.raeperd.realworldspringbootkotlin.util.*
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
-import org.hamcrest.Matchers.emptyString
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
-import org.springframework.test.web.servlet.ResultActionsDsl
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.put
+import org.springframework.test.web.servlet.*
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
@@ -35,11 +25,12 @@ class AuthIntegrationTest(
 ) {
 
     @Test
-    fun `when post users expect valid json response`() {
-        mockMvc.postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username).andExpect {
-            status { isCreated() }
-            content { validUserDTO(MockUser.email, MockUser.username) }
-        }
+    fun `when post get users expect valid response`() {
+        mockMvc.postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username)
+            .andExpect {
+                status { isCreated() }
+                content { validUserDTO(MockUser.email, MockUser.username) }
+            }
     }
 
     @Test
@@ -164,4 +155,21 @@ class AuthIntegrationTest(
         jsonPath("user.bio", equalTo(bio))
         jsonPath("user.image", equalTo(image))
     }
+}
+
+fun MockHttpServletRequestDsl.withAuthToken(token: String) {
+    header(HttpHeaders.AUTHORIZATION, "Token $token")
+}
+
+fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
+    return post("/users") {
+        contentType = APPLICATION_JSON
+        content = UserPostDTO(email, password, username).toJson()
+        accept = APPLICATION_JSON
+    }
+}
+
+fun ResultActionsDsl.andReturnUserToken(): String {
+    return andReturnResponseBody<UserModel>()
+        .user.token
 }
