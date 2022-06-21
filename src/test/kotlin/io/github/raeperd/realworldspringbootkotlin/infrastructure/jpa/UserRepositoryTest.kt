@@ -2,7 +2,6 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
-import io.github.raeperd.realworldspringbootkotlin.util.MockUser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,5 +34,5 @@ class UserRepositoryTest(
     }
 
     private fun UserRepository.saveMockUser() =
-        saveNewUser(MockUser.email, MockUser.username, Password("password"))
+        saveNewUser("user@email.com", "username", Password("password"))
 }
