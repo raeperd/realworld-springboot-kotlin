@@ -2,7 +2,6 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

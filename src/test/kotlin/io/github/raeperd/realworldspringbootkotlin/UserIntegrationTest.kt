@@ -2,76 +2,65 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.MockUser
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnUserToken
+import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.util.postMockUser
-import io.github.raeperd.realworldspringbootkotlin.util.postUsers
-import io.github.raeperd.realworldspringbootkotlin.util.withAuthToken
+import io.github.raeperd.realworldspringbootkotlin.util.toJson
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
-import org.hamcrest.Matchers.emptyString
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
-import org.springframework.test.web.servlet.ResultActionsDsl
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.put
+import org.springframework.test.web.servlet.*
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
-class AuthIntegrationTest(
+class UserIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper
 ) {
-
-    @Test
-    fun `when post users expect valid json response`() {
-        mockMvc.postUsers(MockUser.email, MockUser.RAW_PASSWORD, MockUser.username).andExpect {
-            status { isCreated() }
-            content { validUserDTO(MockUser.email, MockUser.username) }
-        }
+    companion object {
+        const val email = "user@email.com"
+        const val password = "password"
+        const val username = "username"
     }
 
     @Test
-    fun `when invalid login expect error responses`() {
-        mockMvc.postMockUser()
+    fun `when post users expect valid response`() {
+        mockMvc.postUsers(email, password, username)
+            .andExpect {
+                status { isCreated() }
+                content { validUserDTO(email, username) }
+            }
 
-        mockMvc.postUsersLogin("bad-user@email.com", MockUser.RAW_PASSWORD)
+        mockMvc.postUsersLogin(email, "bad-password")
+            .andExpect {
+                status { isBadRequest() }
+                content { notEmptyErrorResponse() }
+            }
+
+        mockMvc.postUsersLogin("bad-email@email.com", password)
             .andExpect {
                 status { isNotFound() }
                 content { notEmptyErrorResponse() }
             }
 
-        mockMvc.postUsersLogin(MockUser.email, "bad-password")
-            .andExpect {
-                status { isBadRequest() }
-                content { notEmptyErrorResponse() }
-            }
-    }
-
-    @Test
-    fun `when login with valid user expect return valid user`() {
-        mockMvc.postMockUser()
-
-        mockMvc.postUsersLogin(MockUser.email, MockUser.RAW_PASSWORD)
+        mockMvc.postUsersLogin(email, password)
             .andExpect {
                 status { isOk() }
-                content { validUserDTO(MockUser.email, MockUser.username) }
+                content { validUserDTO(email, username) }
             }
     }
 
     @Test
-    fun `when get user with invalid authentication expect forbidden status`() {
+    fun `when get put user expect valid response`() {
         mockMvc.get("/user")
             .andExpect {
                 status { isForbidden() }
@@ -83,48 +72,31 @@ class AuthIntegrationTest(
                 status { isBadRequest() }
                 content { notEmptyErrorResponse() }
             }
-    }
 
-    @Test
-    fun `when get user after login expect valid user`() {
-        val token = mockMvc.postMockUser().andReturnUserToken()
-
+        val token = mockMvc.postUsers(email, password, username).andReturnUserToken()
         mockMvc.getUser(token)
             .andExpect {
                 status { isOk() }
-                content { validUserDTO(MockUser.email, MockUser.username) }
+                content { validUserDTO(email, username) }
             }
-    }
 
-    @Test
-    fun `when put user with fields expect return updated user`() {
-        val token = mockMvc.postMockUser().andReturnUserToken()
-
-        val dto = UserPutDTO(
-            "new-user@email.com",
-            "new-username",
+        val putDto = UserPutDTO(
+            email = "new-user@email.com",
+            username = "new-username",
             password = "new-password",
-            "image changed",
-            "bio changed"
+            image = "image changed",
+            bio = "bio changed"
         )
-
-        mockMvc.putUser(token, dto)
+        mockMvc.putUser(token, putDto)
             .andExpect {
                 status { isOk() }
-                content {
-                    validUserDTO(
-                        email = dto.user.email,
-                        username = dto.user.username,
-                        bio = dto.user.bio,
-                        image = dto.user.image
-                    )
-                }
+                content { validUserDTO(putDto) }
             }
 
-        mockMvc.postUsersLogin(dto.user.email!!, "password")
-            .andExpect { status { isBadRequest() } }
+        mockMvc.postUsersLogin(email, password)
+            .andExpect { status { isNotFound() } }
 
-        mockMvc.postUsersLogin(dto.user.email!!, dto.user.password!!)
+        mockMvc.postUsersLogin(putDto.user.email!!, putDto.user.password!!)
             .andExpect { status { isOk() } }
     }
 
@@ -152,6 +124,10 @@ class AuthIntegrationTest(
         }
     }
 
+    private fun MockMvcResultMatchersDsl.validUserDTO(dto: UserPutDTO) {
+        validUserDTO(email = dto.user.email, username = dto.user.username, bio = dto.user.bio, image = dto.user.image)
+    }
+
     private fun MockMvcResultMatchersDsl.validUserDTO(
         email: String?,
         username: String?,
@@ -164,4 +140,22 @@ class AuthIntegrationTest(
         jsonPath("user.bio", equalTo(bio))
         jsonPath("user.image", equalTo(image))
     }
+
+}
+
+fun MockHttpServletRequestDsl.withAuthToken(token: String) {
+    header(HttpHeaders.AUTHORIZATION, "Token $token")
+}
+
+fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
+    return post("/users") {
+        contentType = APPLICATION_JSON
+        content = UserPostDTO(email, password, username).toJson()
+        accept = APPLICATION_JSON
+    }
+}
+
+fun ResultActionsDsl.andReturnUserToken(): String {
+    return andReturnResponseBody<UserModel>()
+        .user.token
 }
