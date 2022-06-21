@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.*
 @ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
-class AuthIntegrationTest(
+class UserIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper
 ) {
