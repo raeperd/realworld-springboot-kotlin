@@ -3,13 +3,13 @@ package io.github.raeperd.realworldspringbootkotlin.domain
 import java.text.Normalizer.Form.NFD
 import java.text.Normalizer.normalize
 import java.time.Instant
-import java.util.Locale
+import java.util.*
 
 interface Article {
     val slug: String
-    val title: String
-    val description: String
-    val body: String
+    var title: String
+    var description: String
+    var body: String
     val tagList: List<Tag>
     val author: Profile
     val createdAt: Instant
@@ -18,6 +18,7 @@ interface Article {
     fun addFavoritedUser(user: User)
     fun removeFavoritedByUser(user: User)
     fun isFavoritedByUser(user: User): Boolean
+    fun isWrittenBy(user: User): Boolean
 }
 
 fun String.slugify(): String = normalize(this, NFD)
@@ -45,4 +46,10 @@ data class ArticleCreateForm(
     val description: String,
     val body: String,
     val tagList: List<String>,
+)
+
+data class ArticleUpdateForm(
+    val title: String?,
+    val description: String?,
+    val body: String?
 )

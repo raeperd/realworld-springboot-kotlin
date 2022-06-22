@@ -1,18 +1,9 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleCreateForm
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
-import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
+import io.github.raeperd.realworldspringbootkotlin.domain.*
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.NO_CONTENT
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class ArticleRestController(
@@ -28,6 +19,14 @@ class ArticleRestController(
     @GetMapping("/articles/{slug}")
     fun getArticlesBySlug(@PathVariable slug: String, payload: JWTPayload?): ArticleModel {
         return articleService.findArticleBySlug(payload?.sub, slug).toArticleModel()
+    }
+
+    @PutMapping("/articles/{slug}")
+    fun putArticlesBySlug(
+        @PathVariable slug: String, payload: JWTPayload, @RequestBody dto: ArticlePutDTO
+    ): ArticleModel {
+        return articleService.updateArticleBySlug(payload.sub, slug, dto.toArticleUpdateForm())
+            .toArticleModel()
     }
 
     @ResponseStatus(NO_CONTENT)
@@ -64,6 +63,22 @@ data class ArticlePostDTO(
         description = article.description,
         body = article.body,
         tagList = article.tagList
+    )
+}
+
+data class ArticlePutDTO(
+    val article: ArticlePutDTONested
+) {
+    data class ArticlePutDTONested(
+        val title: String?,
+        val description: String?,
+        val body: String?
+    )
+
+    fun toArticleUpdateForm() = ArticleUpdateForm(
+        title = article.title,
+        description = article.description,
+        body = article.body
     )
 }
 
