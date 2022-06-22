@@ -6,13 +6,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.NO_CONTENT
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class ArticleRestController(
@@ -64,6 +58,16 @@ data class ArticlePostDTO(
         description = article.description,
         body = article.body,
         tagList = article.tagList
+    )
+}
+
+data class ArticlePutDTO(
+    val article: ArticlePutDTONested
+) {
+    data class ArticlePutDTONested(
+        val title: String?,
+        val description: String?,
+        val body: String?
     )
 }
 

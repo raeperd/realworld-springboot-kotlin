@@ -4,11 +4,16 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
-import io.github.raeperd.realworldspringbootkotlin.util.*
+import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
+import io.github.raeperd.realworldspringbootkotlin.util.SingletonObjectMapper
+import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.toJson
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
+import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import io.github.raeperd.realworldspringbootkotlin.web.toProfileModel
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Test
@@ -38,7 +43,7 @@ class ArticleIntegrationTest(
             .andExpect {
                 status { isCreated() }
                 content { validArticleDTO(postDto, author) }
-            }.andReturnResponseBody<ArticleModel>().article
+            }.andReturnArticleDto()
 
         mockMvc.getArticlesBySlug(postDto.slug)
             .andExpect {
@@ -56,6 +61,39 @@ class ArticleIntegrationTest(
         mockMvc.getArticlesBySlug(postDto.slug)
             .andExpect { status { isNotFound() } }
     }
+
+    @Test
+    fun `when put article expect valid response`() {
+        val postDto = createArticlePostDto("Article Title")
+        val author = mockMvc.postMockUser("author")
+
+        var articleDto = mockMvc.postArticles(author, postDto).andReturnArticleDto()
+
+        val putDto = ArticlePutDTONested("New Article Title", null, null)
+        val viewer = mockMvc.postMockUser("viewer")
+        mockMvc.putArticlesBySlug(articleDto.slug, viewer, putDto)
+            .andExpect { status { isForbidden() } }
+
+        articleDto = mockMvc.putArticlesBySlug(articleDto.slug, author, putDto)
+            .andExpect {
+                status { isOk() }
+                content { validArticleDTO(articleDto.copy(title = putDto.title!!, slug = putDto.title!!.slugify())) }
+            }.andReturnArticleDto()
+
+        putDtoTestCases.forEach { dto ->
+            mockMvc.putArticlesBySlug(articleDto.slug, author, putDto)
+                .andExpect {
+                    status { isOk() }
+                    content { validArticleDTO(articleDto, dto) }
+                }
+        }
+    }
+
+    private val putDtoTestCases = sequenceOf(
+        ArticlePutDTONested(null, "new description", null),
+        ArticlePutDTONested(null, null, "new body"),
+        ArticlePutDTONested(null, "new description with body", "new body with description"),
+    )
 }
 
 fun createArticlePostDto(title: String): ArticlePostDTO {
@@ -83,6 +121,14 @@ fun MockMvc.getArticlesBySlug(slug: String, user: UserDTO? = null): ResultAction
     get("/articles/${slug}") {
         accept = APPLICATION_JSON
         user?.let { withAuthToken(user.token) }
+    }
+
+private fun MockMvc.putArticlesBySlug(slug: String, user: UserDTO, dto: ArticlePutDTONested): ResultActionsDsl =
+    put("/articles/${slug}") {
+        contentType = APPLICATION_JSON
+        accept = APPLICATION_JSON
+        withAuthToken(user.token)
+        content = SingletonObjectMapper.writeValueAsString(dto)
     }
 
 fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
@@ -129,3 +175,18 @@ private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticlePostDTO, author
     ).let { validArticleDTO(it) }
 }
 
+private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO, putDto: ArticlePutDTONested) =
+    validArticleDTO(
+        ArticleDTO(
+            title = putDto.title ?: dto.title,
+            slug = putDto.title?.slugify() ?: dto.slug,
+            description = putDto.description ?: dto.description,
+            body = putDto.description ?: dto.description,
+            tagList = dto.tagList,
+            favorited = dto.favorited, favoritesCount = dto.favoritesCount,
+            createdAt = dto.createdAt, updatedAt = dto.updatedAt,
+            author = dto.author.toProfileModel().profile,
+        )
+    )
+
+private fun ResultActionsDsl.andReturnArticleDto() = andReturnResponseBody<ArticleModel>().article
