@@ -5,19 +5,9 @@ import io.github.raeperd.realworldspringbootkotlin.domain.Tag
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import java.time.Instant
-import javax.persistence.CollectionTable
-import javax.persistence.Column
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
+import javax.persistence.*
 import javax.persistence.FetchType.EAGER
-import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.IDENTITY
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
-import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
-import javax.persistence.Table
 
 @Table(name = "articles")
 @Entity
@@ -37,7 +27,7 @@ class ArticleEntity(
     @ManyToMany(fetch = EAGER)
     override var tagList: MutableList<TagEntity>,
 
-    override var title: String,
+    title: String,
     override var description: String,
     override var body: String,
     override var slug: String = title.slugify(),
@@ -46,6 +36,12 @@ class ArticleEntity(
     @Column(name = "updated_at", nullable = false)
     override val updatedAt: Instant = createdAt,
 ) : Article {
+
+    override var title = title
+        set(value) {
+            field = value
+            slug = value.slugify()
+        }
 
     override val favoritesCount: Int
         get() = userFavorited.size
@@ -59,6 +55,8 @@ class ArticleEntity(
     }
 
     override fun isFavoritedByUser(user: User) = userFavorited.contains(user.id)
+
+    override fun isWrittenBy(user: User) = author.username == user.username
 
     @ElementCollection
     @CollectionTable(name = "article_favorites", joinColumns = [JoinColumn(name = "article_id")])

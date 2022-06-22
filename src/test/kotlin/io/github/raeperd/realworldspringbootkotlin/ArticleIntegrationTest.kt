@@ -5,15 +5,11 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.SingletonObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.util.toJson
-import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
-import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
+import io.github.raeperd.realworldspringbootkotlin.web.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested
-import io.github.raeperd.realworldspringbootkotlin.web.UserModel
-import io.github.raeperd.realworldspringbootkotlin.web.toProfileModel
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Test
@@ -69,27 +65,21 @@ class ArticleIntegrationTest(
 
         var articleDto = mockMvc.postArticles(author, postDto).andReturnArticleDto()
 
-        val putDto = ArticlePutDTONested("New Article Title", null, null)
         val viewer = mockMvc.postMockUser("viewer")
-        mockMvc.putArticlesBySlug(articleDto.slug, viewer, putDto)
+        mockMvc.putArticlesBySlug(articleDto.slug, viewer, putDtoTestCases[0])
             .andExpect { status { isForbidden() } }
 
-        articleDto = mockMvc.putArticlesBySlug(articleDto.slug, author, putDto)
-            .andExpect {
-                status { isOk() }
-                content { validArticleDTO(articleDto.copy(title = putDto.title!!, slug = putDto.title!!.slugify())) }
-            }.andReturnArticleDto()
-
         putDtoTestCases.forEach { dto ->
-            mockMvc.putArticlesBySlug(articleDto.slug, author, putDto)
+            articleDto = mockMvc.putArticlesBySlug(articleDto.slug, author, dto)
                 .andExpect {
                     status { isOk() }
                     content { validArticleDTO(articleDto, dto) }
-                }
+                }.andReturnArticleDto()
         }
     }
 
-    private val putDtoTestCases = sequenceOf(
+    private val putDtoTestCases = listOf(
+        ArticlePutDTONested("New Article Title", null, null),
         ArticlePutDTONested(null, "new description", null),
         ArticlePutDTONested(null, null, "new body"),
         ArticlePutDTONested(null, "new description with body", "new body with description"),
@@ -128,7 +118,7 @@ private fun MockMvc.putArticlesBySlug(slug: String, user: UserDTO, dto: ArticleP
         contentType = APPLICATION_JSON
         accept = APPLICATION_JSON
         withAuthToken(user.token)
-        content = SingletonObjectMapper.writeValueAsString(dto)
+        content = ArticlePutDTO(dto).toJson()
     }
 
 fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
@@ -181,7 +171,7 @@ private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO, putDto: Ar
             title = putDto.title ?: dto.title,
             slug = putDto.title?.slugify() ?: dto.slug,
             description = putDto.description ?: dto.description,
-            body = putDto.description ?: dto.description,
+            body = putDto.body ?: dto.body,
             tagList = dto.tagList,
             favorited = dto.favorited, favoritesCount = dto.favoritesCount,
             createdAt = dto.createdAt, updatedAt = dto.updatedAt,

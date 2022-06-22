@@ -23,10 +23,24 @@ class ArticleService(
             ?: article.toArticleDTO()
     }
 
+    fun updateArticleBySlug(userId: Long, slug: String, form: ArticleUpdateForm): ArticleDTO {
+        val article = articleRepository.findArticleBySlugOrThrow(slug)
+        val user = userRepository.findUserByIdOrThrow(userId)
+        if (!article.isWrittenBy(user)) {
+            throw NotAuthorizedException("User ${user.username} not authorized to update article ${article.slug}")
+        }
+        form.run {
+            title?.let { article.title = title }
+            description?.let { article.description = description }
+            body?.let { article.body = body }
+        }
+        return articleRepository.saveArticle(article).toArticleDTO()
+    }
+
     fun deleteArticleBySlug(userId: Long, slug: String) {
         val article = articleRepository.findArticleBySlugOrThrow(slug)
         val user = userRepository.findUserByIdOrThrow(userId)
-        if (article.author.username != user.username) {
+        if (!article.isWrittenBy(user)) {
             throw NotAuthorizedException("User ${user.username} not authorized to delete article ${article.slug}")
         }
         articleRepository.deleteArticle(article)
