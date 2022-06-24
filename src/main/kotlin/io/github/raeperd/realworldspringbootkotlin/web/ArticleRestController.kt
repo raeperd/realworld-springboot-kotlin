@@ -83,3 +83,5 @@ data class ArticlePutDTO(
 }
 
 data class ArticleModel(val article: ArticleDTO)
+
+data class MultipleArticleModel(val articles: List<ArticleDTO>, val articlesCount: Int)

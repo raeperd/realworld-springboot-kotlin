@@ -10,6 +10,7 @@ import io.github.raeperd.realworldspringbootkotlin.util.toJson
 import io.github.raeperd.realworldspringbootkotlin.web.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Test
@@ -78,6 +79,28 @@ class ArticleIntegrationTest(
         }
     }
 
+    @Test
+    fun `when get articles expect valid response`() {
+        val author = mockMvc.postMockUser("author")
+        postArticleSamples(author)
+
+        mockMvc.get("/articles")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(20) }
+    }
+
+    private fun postArticleSamples(author: UserDTO) {
+        (0..21).map { index ->
+            ArticlePostDTONested(
+                "Sample Title $index",
+                "Sample Description $index",
+                body = "Sample Body $index",
+                tagList = listOf("tag1", "tag2")
+            )
+        }.forEach { dto -> mockMvc.postArticles(author, dto) }
+    }
+
     private val putDtoTestCases = listOf(
         ArticlePutDTONested("New Article Title", null, null),
         ArticlePutDTONested(null, "new description", null),
@@ -86,11 +109,11 @@ class ArticleIntegrationTest(
     )
 }
 
-fun createArticlePostDto(title: String): ArticlePostDTO {
+fun createArticlePostDto(title: String, tagList: List<String> = listOf("tag1, tag2")): ArticlePostDTO {
     return ArticlePostDTO(
         ArticlePostDTONested(
             title = title, description = "Description", body = "Body",
-            tagList = listOf("tag1, tag2")
+            tagList = tagList
         )
     )
 }
@@ -112,6 +135,9 @@ fun MockMvc.getArticlesBySlug(slug: String, user: UserDTO? = null): ResultAction
         accept = APPLICATION_JSON
         user?.let { withAuthToken(user.token) }
     }
+
+private fun MockMvc.postArticles(author: UserDTO, dto: ArticlePostDTONested) =
+    postArticles(author, ArticlePostDTO(dto))
 
 private fun MockMvc.putArticlesBySlug(slug: String, user: UserDTO, dto: ArticlePutDTONested): ResultActionsDsl =
     put("/articles/${slug}") {
@@ -180,3 +206,5 @@ private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO, putDto: Ar
     )
 
 private fun ResultActionsDsl.andReturnArticleDto() = andReturnResponseBody<ArticleModel>().article
+
+private fun ResultActionsDsl.andReturnMultipleArticles() = andReturnResponseBody<MultipleArticleModel>()
