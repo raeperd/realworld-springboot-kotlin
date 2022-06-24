@@ -1,5 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.text.Normalizer.Form.NFD
 import java.text.Normalizer.normalize
 import java.time.Instant
@@ -32,6 +34,8 @@ interface Tag {
 }
 
 interface ArticleRepository {
+    fun getAllArticles(pageable: Pageable): Page<out Article>
+
     fun findArticleBySlug(slug: String): Article?
     fun findArticleBySlugOrThrow(slug: String): Article =
         findArticleBySlug(slug) ?: throw NoSuchElementException("No such article with slug: $slug")
