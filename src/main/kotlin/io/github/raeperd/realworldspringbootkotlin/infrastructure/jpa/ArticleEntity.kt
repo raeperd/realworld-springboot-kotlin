@@ -7,6 +7,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.FetchType.EAGER
+import javax.persistence.FetchType.LAZY
 import javax.persistence.GenerationType.IDENTITY
 
 @Table(name = "articles")
@@ -24,13 +25,12 @@ class ArticleEntity(
         joinColumns = [JoinColumn(name = "article_id", referencedColumnName = "id", nullable = false)],
         inverseJoinColumns = [JoinColumn(name = "tag_id", referencedColumnName = "id", nullable = false)]
     )
-    @ManyToMany(fetch = EAGER)
+    @ManyToMany(fetch = LAZY)
     override var tagList: MutableList<TagEntity>,
 
     title: String,
     override var description: String,
     override var body: String,
-    override var slug: String = title.slugify(),
     @Column(name = "created_at", nullable = false)
     override val createdAt: Instant = Instant.now(),
     @Column(name = "updated_at", nullable = false)
@@ -42,6 +42,9 @@ class ArticleEntity(
             field = value
             slug = value.slugify()
         }
+
+    override var slug: String = title.slugify()
+        protected set
 
     override val favoritesCount: Int
         get() = userFavorited.size
