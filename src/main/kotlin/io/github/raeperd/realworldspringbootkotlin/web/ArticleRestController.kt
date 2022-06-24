@@ -1,6 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
 import io.github.raeperd.realworldspringbootkotlin.domain.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.web.bind.annotation.*
@@ -35,6 +37,12 @@ class ArticleRestController(
         articleService.deleteArticleBySlug(payload.sub, slug)
     }
 
+    @GetMapping("/articles")
+    fun getArticles(pageable: Pageable): MultipleArticleModel {
+        return articleService.getArticles(pageable)
+            .toMultipleArticleModel()
+    }
+
     @PostMapping("/articles/{slug}/favorite")
     fun postArticleFavoriteBySlug(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
         return articleService.favoriteArticle(payload.sub, slug).toArticleModel()
@@ -46,6 +54,8 @@ class ArticleRestController(
     }
 
     private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
+
+    private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, size)
 }
 
 data class ArticlePostDTO(

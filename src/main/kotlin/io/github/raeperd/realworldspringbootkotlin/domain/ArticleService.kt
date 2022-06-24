@@ -1,5 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -44,6 +46,11 @@ class ArticleService(
             throw NotAuthorizedException("User ${user.username} not authorized to delete article ${article.slug}")
         }
         articleRepository.deleteArticle(article)
+    }
+
+    fun getArticles(pageable: Pageable): Page<ArticleDTO> {
+        return articleRepository.getAllArticles(pageable)
+            .map { it.toArticleDTO() }
     }
 
     fun favoriteArticle(userId: Long, slug: String): ArticleDTO {
