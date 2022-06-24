@@ -88,6 +88,11 @@ class ArticleIntegrationTest(
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
             .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(20) }
+
+        mockMvc.get("/articles?offset=1&limit=5")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(5) }
     }
 
     private fun postArticleSamples(author: UserDTO) {
