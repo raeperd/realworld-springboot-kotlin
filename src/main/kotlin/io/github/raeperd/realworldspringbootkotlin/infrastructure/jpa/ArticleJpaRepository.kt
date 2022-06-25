@@ -1,12 +1,10 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Article
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleCreateForm
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleRepository
-import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -15,8 +13,8 @@ class ArticleJpaRepository(
     private val tagEntityRepository: TagEntityRepository
 ) : ArticleRepository {
 
-    override fun getAllArticles(pageable: Pageable): Page<out Article> {
-        return articleEntityRepository.findAll(pageable)
+    override fun getAllArticles(pageable: Pageable, param: ArticleQueryParam): Page<out Article> {
+        return articleEntityRepository.findAll(createSpecification(param), pageable)
     }
 
     override fun findArticleBySlug(slug: String): Article? {
@@ -73,7 +71,7 @@ class ArticleJpaRepository(
     }
 }
 
-interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long> {
+interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>, JpaSpecificationExecutor<ArticleEntity> {
     fun findFirstBySlug(slug: String): ArticleEntity?
 }
 

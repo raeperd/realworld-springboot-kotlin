@@ -82,28 +82,53 @@ class ArticleIntegrationTest(
     @Test
     fun `when get articles expect valid response`() {
         val author = mockMvc.postMockUser("author")
-        postArticleSamples(author)
+        val anotherAuthor = mockMvc.postMockUser("another-author")
+        postArticleSamples(author, 10, listOf("tag1"))
+        postArticleSamples(anotherAuthor, 12, listOf("tag1", "tag2"))
 
         mockMvc.get("/articles")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(20) }
+            .apply { assertHasSize(20) }
 
         mockMvc.get("/articles?offset=1&limit=5")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(5) }
+            .apply { assertHasSize(5) }
+
+        mockMvc.get("/articles?author=${author.username}")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertHasSize(10) }
+
+        mockMvc.get("/articles?tag=tag2")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertHasSize(12) }
+
+        val articleDto = postSampleArticle(author, listOf("tag3")).andReturnArticleDto()
+        mockMvc.post("/articles/${articleDto.slug}/favorite") {
+            withAuthToken(anotherAuthor.token)
+        }
+
+        mockMvc.get("/articles?favorited=${anotherAuthor.username}")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertHasSize(1) }
     }
 
-    private fun postArticleSamples(author: UserDTO) {
-        (0..21).map { index ->
-            ArticlePostDTONested(
-                "Sample Title $index",
-                "Sample Description $index",
-                body = "Sample Body $index",
-                tagList = listOf("tag1", "tag2")
-            )
-        }.forEach { dto -> mockMvc.postArticles(author, dto) }
+    private fun postArticleSamples(author: UserDTO, count: Int, tags: List<String>) {
+        repeat(count) { postSampleArticle(author, tags) }
+    }
+
+    private fun postSampleArticle(author: UserDTO, tags: List<String>): ResultActionsDsl {
+        val dto = ArticlePostDTONested(
+            title = "Sample title",
+            description = "Sample description",
+            body = "Sample body",
+            tagList = tags
+        )
+        return mockMvc.postArticles(author, dto)
     }
 
     private val putDtoTestCases = listOf(
@@ -112,6 +137,10 @@ class ArticleIntegrationTest(
         ArticlePutDTONested(null, null, "new body"),
         ArticlePutDTONested(null, "new description with body", "new body with description"),
     )
+
+    private fun MultipleArticleModel.assertHasSize(size: Int) {
+        assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(size)
+    }
 }
 
 fun createArticlePostDto(title: String, tagList: List<String> = listOf("tag1, tag2")): ArticlePostDTO {

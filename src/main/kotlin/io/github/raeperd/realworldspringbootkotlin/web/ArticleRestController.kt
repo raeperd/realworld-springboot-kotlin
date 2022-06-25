@@ -38,8 +38,8 @@ class ArticleRestController(
     }
 
     @GetMapping("/articles")
-    fun getArticles(pageable: Pageable): MultipleArticleModel {
-        return articleService.getArticles(pageable)
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam): MultipleArticleModel {
+        return articleService.getArticles(pageable, param)
             .toMultipleArticleModel()
     }
 
@@ -55,7 +55,7 @@ class ArticleRestController(
 
     private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
 
-    private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, size)
+    private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, content.size)
 }
 
 data class ArticlePostDTO(

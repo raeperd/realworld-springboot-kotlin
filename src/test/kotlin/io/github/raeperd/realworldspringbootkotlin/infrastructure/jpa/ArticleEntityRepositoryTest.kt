@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
+import io.github.raeperd.realworldspringbootkotlin.domain.ArticleQueryParam
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Import
 class ArticleEntityRepositoryTest @Autowired constructor(
     private val userRepository: UserRepository,
     private val articleRepository: ArticleEntityRepository,
-    private val testEntityManager: TestEntityManager,
+    private val testEntityManager: TestEntityManager
 ) {
     @Test
     fun `when save new article with user expect to be persisted`() {
@@ -28,38 +29,54 @@ class ArticleEntityRepositoryTest @Autowired constructor(
     }
 
     @Test
-    fun `when find all tags expect return value`() {
-        val tag = TagEntity("tag1")
-        val tag2 = TagEntity("tag2")
-
-        testEntityManager.persist(tag)
-        testEntityManager.persist(tag2)
-    }
-
-    @Test
     fun `when user favorite article expect persisted`() {
         val user = userRepository.saveMockUser()
 
         val articleSaved = articleRepository.saveMockArticle(user)
-            .let { article ->
-                user.favoriteArticle(article)
-                article
-            }.let { articleUpdated -> articleRepository.save(articleUpdated) }
+            .also { article -> user.favoriteArticle(article) }
+            .let { articleUpdated -> articleRepository.save(articleUpdated) }
 
         assertThat(articleSaved.isFavoritedByUser(user)).isTrue
     }
 
-    private fun UserRepository.saveMockUser() =
-        saveNewUser("user@email.com", "username", Password("password")) as UserEntity
+    @Test
+    fun `when query with criteria expect return valid`() {
+        userRepository.saveMockUser("other-user")
+            .also { user -> articleRepository.saveMockArticle(user, mutableListOf("tag1")) }
+        val author = userRepository.saveMockUser()
+            .also { author ->
+                articleRepository.saveMockArticle(author)
+                articleRepository.saveMockArticle(author, mutableListOf("tag1"))
+            }
 
-    private fun ArticleEntityRepository.saveMockArticle(user: UserEntity) =
-        save(
+        data class Testcase(val param: ArticleQueryParam, val expectedCount: Int)
+        listOf(
+            Testcase(param = ArticleQueryParam(), expectedCount = 3),
+            Testcase(param = ArticleQueryParam(author = author.username), expectedCount = 2),
+            Testcase(param = ArticleQueryParam(tag = "tag1"), expectedCount = 2),
+            Testcase(param = ArticleQueryParam(author = author.username, tag = "tag1"), expectedCount = 1),
+        ).forEach { testcase ->
+            val spec = createSpecification(testcase.param)
+            assertThat(articleRepository.findAll(spec)).hasSize(testcase.expectedCount)
+        }
+    }
+
+    private fun UserRepository.saveMockUser(name: String = "user") =
+        saveNewUser("$name@email.com", name, Password("password")) as UserEntity
+
+    private fun ArticleEntityRepository.saveMockArticle(
+        user: UserEntity,
+        tags: MutableList<String> = mutableListOf()
+    ): ArticleEntity {
+        return save(
             ArticleEntity(
                 author = user,
-                tagList = mutableListOf(),
+                tagList = tags.map { testEntityManager.persist(TagEntity(it)) }.toMutableList(),
                 "Mock title",
                 "Mock description",
                 "Mock Body",
             )
         )
+    }
+
 }
