@@ -55,7 +55,7 @@ class ArticleRestController(
 
     private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
 
-    private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, size)
+    private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, content.size)
 }
 
 data class ArticlePostDTO(
