@@ -91,6 +91,11 @@ class ArticleIntegrationTest(
             .andReturnMultipleArticles()
             .apply { assertHasSize(20) }
 
+        mockMvc.get("/articles?limit=100")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertHasSize(22) }
+
         mockMvc.get("/articles?offset=1&limit=5")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()

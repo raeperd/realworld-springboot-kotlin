@@ -3,8 +3,8 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.repository.findByIdOrNull
 
 class UserJpaRepository(
     private val userEntityRepository: UserEntityRepository
@@ -20,7 +20,7 @@ class UserJpaRepository(
     }
 
     override fun findUserById(id: Long): User? {
-        return userEntityRepository.findByIdOrNull(id)
+        return userEntityRepository.findFirstById(id)
     }
 
     override fun findUserByUsername(name: String): User? {
@@ -46,6 +46,12 @@ class UserJpaRepository(
 }
 
 interface UserEntityRepository : JpaRepository<UserEntity, Long> {
+    @EntityGraph(attributePaths = ["followingUsers"])
     fun findFirstByEmail(email: String): User?
+
+    @EntityGraph(attributePaths = ["followingUsers"])
     fun findFirstByUsername(username: String): User?
+
+    @EntityGraph(attributePaths = ["followingUsers"])
+    fun findFirstById(id: Long): User?
 }

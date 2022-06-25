@@ -3,6 +3,8 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 import io.github.raeperd.realworldspringbootkotlin.domain.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
@@ -72,7 +74,11 @@ class ArticleJpaRepository(
 }
 
 interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>, JpaSpecificationExecutor<ArticleEntity> {
+    @EntityGraph(attributePaths = ["author", "tagList"])
     fun findFirstBySlug(slug: String): ArticleEntity?
+
+    @EntityGraph(attributePaths = ["author"])
+    override fun findAll(spec: Specification<ArticleEntity>?, pageable: Pageable): Page<ArticleEntity>
 }
 
 interface TagEntityRepository : JpaRepository<TagEntity, Long> {
