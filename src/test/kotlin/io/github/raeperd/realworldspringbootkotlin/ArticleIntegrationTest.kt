@@ -89,22 +89,22 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(20) }
+            .apply { assertHasSize(20) }
 
         mockMvc.get("/articles?offset=1&limit=5")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(5) }
+            .apply { assertHasSize(5) }
 
         mockMvc.get("/articles?author=${author.username}")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(10) }
+            .apply { assertHasSize(10) }
 
         mockMvc.get("/articles?tag=tag2")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(12) }
+            .apply { assertHasSize(12) }
 
         val articleDto = postSampleArticle(author, listOf("tag3")).andReturnArticleDto()
         mockMvc.post("/articles/${articleDto.slug}/favorite") {
@@ -114,7 +114,7 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles?favorited=${anotherAuthor.username}")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(1) }
+            .apply { assertHasSize(1) }
     }
 
     private fun postArticleSamples(author: UserDTO, count: Int, tags: List<String>) {
@@ -137,6 +137,10 @@ class ArticleIntegrationTest(
         ArticlePutDTONested(null, null, "new body"),
         ArticlePutDTONested(null, "new description with body", "new body with description"),
     )
+
+    private fun MultipleArticleModel.assertHasSize(size: Int) {
+        assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(size)
+    }
 }
 
 fun createArticlePostDto(title: String, tagList: List<String> = listOf("tag1, tag2")): ArticlePostDTO {
