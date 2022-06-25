@@ -48,8 +48,8 @@ class ArticleService(
         articleRepository.deleteArticle(article)
     }
 
-    fun getArticles(pageable: Pageable): Page<ArticleDTO> {
-        return articleRepository.getAllArticles(pageable)
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam): Page<ArticleDTO> {
+        return articleRepository.getAllArticles(pageable, param)
             .map { it.toArticleDTO() }
     }
 

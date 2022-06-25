@@ -43,6 +43,6 @@ class WebConfiguration : WebMvcConfigurer {
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
-        resolvers.add(JWTPayloadArgumentResolver())
+        resolvers.addAll(arrayOf(JWTPayloadArgumentResolver(), ArticleQueryParamArgumentResolver()))
     }
 }

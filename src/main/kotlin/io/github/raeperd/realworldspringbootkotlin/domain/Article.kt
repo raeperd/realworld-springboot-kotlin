@@ -34,7 +34,7 @@ interface Tag {
 }
 
 interface ArticleRepository {
-    fun getAllArticles(pageable: Pageable): Page<out Article>
+    fun getAllArticles(pageable: Pageable, param: ArticleQueryParam): Page<out Article>
 
     fun findArticleBySlug(slug: String): Article?
     fun findArticleBySlugOrThrow(slug: String): Article =
@@ -56,4 +56,8 @@ data class ArticleUpdateForm(
     val title: String?,
     val description: String?,
     val body: String?
+)
+
+data class ArticleQueryParam(
+    val author: String?
 )
