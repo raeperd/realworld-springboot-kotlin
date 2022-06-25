@@ -21,6 +21,7 @@ class ArticleQueryParamArgumentResolver : HandlerMethodArgumentResolver {
         return ArticleQueryParam(
             author = webRequest.getParameter("author"),
             tag = webRequest.getParameter("tag"),
+            favorited = webRequest.getParameter("favorited")
         )
     }
 }

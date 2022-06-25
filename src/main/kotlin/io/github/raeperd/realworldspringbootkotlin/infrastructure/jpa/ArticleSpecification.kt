@@ -12,6 +12,9 @@ fun createSpecification(queryParam: ArticleQueryParam): Specification<ArticleEnt
     if (queryParam.tag != null) {
         specification = specification.and(hasTag(queryParam.tag))
     }
+    if (queryParam.favorited != null) {
+        specification = specification.and(favoritedBy(queryParam.favorited))
+    }
     return specification
 }
 
@@ -32,5 +35,18 @@ private fun hasTag(name: String): Specification<ArticleEntity> {
             criteriaBuilder.isMember(tag, root.get<Collection<TagEntity>>("tagList"))
         )
         criteriaBuilder.exists(tagSubQuery)
+    }
+}
+
+private fun favoritedBy(name: String): Specification<ArticleEntity> {
+    return Specification<ArticleEntity> { root, query, criteriaBuilder ->
+        val userSubQuery = query.subquery(UserEntity::class.java)
+        val user = userSubQuery.from(UserEntity::class.java)
+        userSubQuery.select(user)
+        userSubQuery.where(
+            criteriaBuilder.equal(user.get<String>("username"), name),
+            criteriaBuilder.isMember(user.get("id"), root.get<Collection<Long>>("userFavorited"))
+        )
+        criteriaBuilder.exists(userSubQuery)
     }
 }

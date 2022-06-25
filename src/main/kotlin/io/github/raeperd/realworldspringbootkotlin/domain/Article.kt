@@ -61,4 +61,5 @@ data class ArticleUpdateForm(
 data class ArticleQueryParam(
     val author: String? = null,
     val tag: String? = null,
+    val favorited: String? = null
 )
