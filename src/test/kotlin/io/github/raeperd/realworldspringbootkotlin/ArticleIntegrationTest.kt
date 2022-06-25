@@ -83,8 +83,8 @@ class ArticleIntegrationTest(
     fun `when get articles expect valid response`() {
         val author = mockMvc.postMockUser("author")
         val anotherAuthor = mockMvc.postMockUser("another-author")
-        postArticleSamples(author, 10)
-        postArticleSamples(anotherAuthor, 12)
+        postArticleSamples(author, 10, listOf("tag1"))
+        postArticleSamples(anotherAuthor, 12, listOf("tag1", "tag2"))
 
         mockMvc.get("/articles")
             .andExpect { status { isOk() } }
@@ -100,15 +100,20 @@ class ArticleIntegrationTest(
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
             .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(10) }
+
+        mockMvc.get("/articles?tag=tag2")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(12) }
     }
 
-    private fun postArticleSamples(author: UserDTO, count: Int) {
+    private fun postArticleSamples(author: UserDTO, count: Int, tags: List<String>) {
         repeat(count) { index ->
             val postDto = ArticlePostDTONested(
                 "Sample Title $index",
                 "Sample Description $index",
                 body = "Sample Body $index",
-                tagList = listOf("tag1", "tag2")
+                tagList = tags
             )
             mockMvc.postArticles(author, postDto)
 
