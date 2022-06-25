@@ -53,18 +53,16 @@ class ArticleEntity(
             updatedAt = Instant.now()
         }
 
-    final override var slug: String = title.slugify()
-        private set
+    override var slug: String = title.slugify()
 
     override val favoritesCount: Int
         get() = userFavorited.size
 
     @Column(name = "created_at", nullable = false)
-    final override val createdAt: Instant = Instant.now()
+    override val createdAt: Instant = Instant.now()
 
     @Column(name = "updated_at", nullable = false)
-    final override var updatedAt: Instant = createdAt
-        private set
+    override var updatedAt: Instant = createdAt
 
     override fun addFavoritedUser(user: User) {
         user.id?.let { userId -> userFavorited.add(userId) }
