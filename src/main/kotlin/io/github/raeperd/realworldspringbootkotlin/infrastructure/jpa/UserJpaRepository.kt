@@ -36,7 +36,6 @@ class UserJpaRepository(
 
     private fun createUserEntity(email: String, username: String, password: Password): UserEntity {
         return UserEntity(
-            id = null,
             email = email,
             username = username,
             password = password,

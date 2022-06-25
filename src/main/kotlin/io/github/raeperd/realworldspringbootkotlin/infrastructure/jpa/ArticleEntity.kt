@@ -7,44 +7,64 @@ import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.FetchType.EAGER
+import javax.persistence.FetchType.LAZY
 import javax.persistence.GenerationType.IDENTITY
 
 @Table(name = "articles")
 @Entity
 class ArticleEntity(
-    @Id @GeneratedValue(strategy = IDENTITY)
-    var id: Long? = null,
-
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = EAGER)
-    override var author: ProfileEntity,
+    override val author: ProfileEntity,
 
     @JoinTable(
         name = "articles_tags",
         joinColumns = [JoinColumn(name = "article_id", referencedColumnName = "id", nullable = false)],
         inverseJoinColumns = [JoinColumn(name = "tag_id", referencedColumnName = "id", nullable = false)]
     )
-    @ManyToMany(fetch = EAGER)
-    override var tagList: MutableList<TagEntity>,
+    @ManyToMany(fetch = LAZY)
+    override val tagList: MutableList<TagEntity>,
 
     title: String,
-    override var description: String,
-    override var body: String,
-    override var slug: String = title.slugify(),
-    @Column(name = "created_at", nullable = false)
-    override val createdAt: Instant = Instant.now(),
-    @Column(name = "updated_at", nullable = false)
-    override val updatedAt: Instant = createdAt,
+    description: String,
+    body: String,
 ) : Article {
+
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    private val id: Long? = null
 
     override var title = title
         set(value) {
             field = value
             slug = value.slugify()
+            updatedAt = Instant.now()
         }
+
+    override var description = description
+        set(value) {
+            field = value
+            updatedAt = Instant.now()
+        }
+
+    override var body = body
+        set(value) {
+            field = value
+            updatedAt = Instant.now()
+        }
+
+    final override var slug: String = title.slugify()
+        private set
 
     override val favoritesCount: Int
         get() = userFavorited.size
+
+    @Column(name = "created_at", nullable = false)
+    final override val createdAt: Instant = Instant.now()
+
+    @Column(name = "updated_at", nullable = false)
+    final override var updatedAt: Instant = createdAt
+        private set
 
     override fun addFavoritedUser(user: User) {
         user.id?.let { userId -> userFavorited.add(userId) }
@@ -67,10 +87,11 @@ class ArticleEntity(
 @Table(name = "tags")
 @Entity
 class TagEntity(
-    @Id @GeneratedValue(strategy = IDENTITY)
-    var id: Long?,
     var name: String
 ) : Tag {
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    private val id: Long? = null
 
     override fun toString(): String {
         return name
