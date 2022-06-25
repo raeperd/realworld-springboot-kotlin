@@ -105,19 +105,30 @@ class ArticleIntegrationTest(
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
             .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(12) }
+
+        val articleDto = postSampleArticle(author, listOf("tag3")).andReturnArticleDto()
+        mockMvc.post("/articles/${articleDto.slug}/favorite") {
+            withAuthToken(anotherAuthor.token)
+        }
+
+        mockMvc.get("/articles?favorited=${anotherAuthor.username}")
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(1) }
     }
 
     private fun postArticleSamples(author: UserDTO, count: Int, tags: List<String>) {
-        repeat(count) { index ->
-            val postDto = ArticlePostDTONested(
-                "Sample Title $index",
-                "Sample Description $index",
-                body = "Sample Body $index",
-                tagList = tags
-            )
-            mockMvc.postArticles(author, postDto)
+        repeat(count) { postSampleArticle(author, tags) }
+    }
 
-        }
+    private fun postSampleArticle(author: UserDTO, tags: List<String>): ResultActionsDsl {
+        val dto = ArticlePostDTONested(
+            title = "Sample title",
+            description = "Sample description",
+            body = "Sample body",
+            tagList = tags
+        )
+        return mockMvc.postArticles(author, dto)
     }
 
     private val putDtoTestCases = listOf(
