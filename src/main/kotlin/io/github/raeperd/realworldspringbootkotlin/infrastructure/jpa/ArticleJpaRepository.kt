@@ -57,14 +57,13 @@ class ArticleJpaRepository(
         }
         val tagNamesFound = tagsFound.map { it.name }
         return names.filterNot { name -> tagNamesFound.contains(name) }
-            .map { notFoundName -> TagEntity(null, notFoundName) }
+            .map { notFoundName -> TagEntity(notFoundName) }
             .let { tagEntities -> tagEntityRepository.saveAll(tagEntities) }
             .apply { addAll(tagsFound) }
     }
 
     private fun UserEntity.writeArticle(form: ArticleCreateForm, tags: List<TagEntity>): ArticleEntity {
         return ArticleEntity(
-            id = null,
             author = this,
             tagList = tags.toMutableList(),
             title = form.title,

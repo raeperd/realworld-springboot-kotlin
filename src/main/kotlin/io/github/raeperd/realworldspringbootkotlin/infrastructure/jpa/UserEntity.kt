@@ -8,7 +8,6 @@ import javax.persistence.*
 
 @Entity
 class UserEntity(
-    id: Long? = null,
     username: String,
     image: String?,
     bio: String,
@@ -18,7 +17,7 @@ class UserEntity(
     @Embedded
     override var password: Password,
 
-    ) : User, ProfileEntity(id, username, image, bio) {
+    ) : User, ProfileEntity(username, image, bio) {
 
     @ElementCollection
     @CollectionTable(name = "user_followings", joinColumns = [JoinColumn(name = "follower_id")])
@@ -26,7 +25,7 @@ class UserEntity(
     private val followingUsers: MutableSet<Long> = HashSet()
 
     override fun viewUserProfile(user: User): Profile {
-        return ProfileEntity(user.id, user.username, user.image, user.bio, followingUsers.contains(user.id))
+        return ProfileEntity(user.username, user.image, user.bio, followingUsers.contains(user.id))
     }
 
     override fun followUser(userToFollow: User) {

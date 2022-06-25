@@ -20,17 +20,17 @@ class ArticleEntityRepositoryTest @Autowired constructor(
     fun `when save new article with user expect to be persisted`() {
         val user = userRepository.saveMockUser()
 
-        val articleSaved = ArticleEntity(null, user, mutableListOf(), "", "", "")
-            .let { article -> testEntityManager.persistAndGetId(article) }
-            .let { id -> testEntityManager.find(ArticleEntity::class.java, id) }
+        val articleSaved = ArticleEntity(user, mutableListOf(), "", "", "")
+            .let { article -> articleRepository.save(article) }
+            .let { articleSaved -> articleRepository.findFirstBySlug(articleSaved.slug) }
 
-        assertThat(articleSaved.author).isEqualTo(user)
+        assertThat(articleSaved?.author).isEqualTo(user)
     }
 
     @Test
     fun `when find all tags expect return value`() {
-        val tag = TagEntity(null, "tag1")
-        val tag2 = TagEntity(null, "tag2")
+        val tag = TagEntity("tag1")
+        val tag2 = TagEntity("tag2")
 
         testEntityManager.persist(tag)
         testEntityManager.persist(tag2)
@@ -55,7 +55,6 @@ class ArticleEntityRepositoryTest @Autowired constructor(
     private fun ArticleEntityRepository.saveMockArticle(user: UserEntity) =
         save(
             ArticleEntity(
-                id = null,
                 author = user,
                 tagList = mutableListOf(),
                 "Mock title",

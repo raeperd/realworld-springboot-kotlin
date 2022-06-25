@@ -34,7 +34,6 @@ internal class UserEntityTest {
 
     private fun UserEntity.withDifferentUsername(username: String): UserEntity =
         UserEntity(
-            id = id,
             email = email,
             username = username, password = password, image = image, bio = bio
         )
