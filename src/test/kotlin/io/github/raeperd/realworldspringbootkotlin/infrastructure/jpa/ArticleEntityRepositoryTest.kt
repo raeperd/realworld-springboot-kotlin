@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
-import org.springframework.data.domain.PageRequest.of
 
 @Import(JpaConfiguration::class)
 @DataJpaTest
@@ -45,20 +44,21 @@ class ArticleEntityRepositoryTest @Autowired constructor(
         userRepository.saveMockUser("other-user")
             .also { user -> articleRepository.saveMockArticle(user, mutableListOf("tag1")) }
         val author = userRepository.saveMockUser()
-        articleRepository.saveMockArticle(author)
-        articleRepository.saveMockArticle(author, mutableListOf("tag1"))
+            .also { author ->
+                articleRepository.saveMockArticle(author)
+                articleRepository.saveMockArticle(author, mutableListOf("tag1"))
+            }
 
-        val authorParam = ArticleQueryParam(author = author.username)
-        assertThat(articleRepository.findAll(createSpecification(authorParam), of(0, 20))).hasSize(2)
-
-        val emptyParam = ArticleQueryParam(null, null)
-        assertThat(articleRepository.findAll(createSpecification(emptyParam), of(0, 20))).hasSize(3)
-
-        val tagParam = ArticleQueryParam(tag = "tag1")
-        assertThat(articleRepository.findAll(createSpecification(tagParam), of(0, 20))).hasSize(2)
-
-        val authorAndTagParam = ArticleQueryParam(author = author.username, tag = "tag1")
-        assertThat(articleRepository.findAll(createSpecification(authorAndTagParam), of(0, 20))).hasSize(1)
+        data class Testcase(val param: ArticleQueryParam, val expectedCount: Int)
+        listOf(
+            Testcase(param = ArticleQueryParam(), expectedCount = 3),
+            Testcase(param = ArticleQueryParam(author = author.username), expectedCount = 2),
+            Testcase(param = ArticleQueryParam(tag = "tag1"), expectedCount = 2),
+            Testcase(param = ArticleQueryParam(author = author.username, tag = "tag1"), expectedCount = 1),
+        ).forEach { testcase ->
+            val spec = createSpecification(testcase.param)
+            assertThat(articleRepository.findAll(spec)).hasSize(testcase.expectedCount)
+        }
     }
 
     private fun UserRepository.saveMockUser(name: String = "user") =
