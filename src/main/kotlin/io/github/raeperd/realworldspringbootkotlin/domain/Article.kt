@@ -59,5 +59,6 @@ data class ArticleUpdateForm(
 )
 
 data class ArticleQueryParam(
-    val author: String? = null
+    val author: String? = null,
+    val tag: String? = null,
 )

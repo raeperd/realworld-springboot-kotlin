@@ -18,7 +18,10 @@ class ArticleQueryParamArgumentResolver : HandlerMethodArgumentResolver {
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): Any {
-        return ArticleQueryParam(webRequest.getParameter("author"))
+        return ArticleQueryParam(
+            author = webRequest.getParameter("author"),
+            tag = webRequest.getParameter("tag"),
+        )
     }
 }
 
