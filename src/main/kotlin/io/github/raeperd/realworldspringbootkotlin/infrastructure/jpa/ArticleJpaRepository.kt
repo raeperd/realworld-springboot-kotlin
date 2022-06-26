@@ -95,6 +95,3 @@ interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>, JpaSpeci
     fun findAllByAuthorIdIsInOrderByCreatedAtDesc(ids: Collection<Long>, pageable: Pageable): Page<ArticleEntity>
 }
 
-interface TagEntityRepository : JpaRepository<TagEntity, Long> {
-    fun findAllByNameIsIn(names: Collection<String>): List<TagEntity>
-}
