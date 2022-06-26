@@ -48,59 +48,13 @@ class ArticleService(
         articleRepository.deleteArticle(article)
     }
 
-    fun getArticles(pageable: Pageable, param: ArticleQueryParam): Page<ArticleDTO> {
-        return articleRepository.getAllArticles(pageable, param)
-            .map { it.toArticleDTO() }
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam, viewerId: Long? = null): Page<ArticleDTO> {
+        val articles = articleRepository.getAllArticles(pageable, param)
+        return viewerId?.let { id -> userRepository.findUserByIdOrThrow(id) }
+            ?.let { user -> articles.map { it.toArticleDTO(user) } }
+            ?: articles.map { it.toArticleDTO() }
     }
 
-    fun favoriteArticle(userId: Long, slug: String): ArticleDTO {
-        val user = userRepository.findUserByIdOrThrow(userId)
-        val article = articleRepository.findArticleBySlugOrThrow(slug)
-        user.favoriteArticle(article)
-        return articleRepository.saveArticle(article)
-            .toArticleDTO(user)
-    }
-
-    fun unfavoriteArticle(userId: Long, slug: String): ArticleDTO {
-        val user = userRepository.findUserByIdOrThrow(userId)
-        val article = articleRepository.findArticleBySlugOrThrow(slug)
-        if (!article.isFavoritedByUser(user)) {
-            return article.toArticleDTO()
-        }
-        user.unfavoriteArticle(article)
-        return articleRepository.saveArticle(article)
-            .toArticleDTO(user)
-    }
-
-    private fun Article.toArticleDTO(user: User): ArticleDTO {
-        return ArticleDTO(
-            slug = slug,
-            title = title,
-            description = description,
-            body = body,
-            tagList = tagList.map { it.toString() },
-            author = author.toProfileDTO(),
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            favoritesCount = favoritesCount,
-            favorited = isFavoritedByUser(user)
-        )
-    }
-
-    private fun Article.toArticleDTO(): ArticleDTO {
-        return ArticleDTO(
-            slug = slug,
-            title = title,
-            description = description,
-            body = body,
-            tagList = tagList.map { it.toString() },
-            author = author.toProfileDTO(),
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            favoritesCount = favoritesCount,
-            favorited = false
-        )
-    }
 }
 
 data class ArticleDTO(
@@ -115,3 +69,33 @@ data class ArticleDTO(
     val favoritesCount: Int,
     val favorited: Boolean
 )
+
+fun Article.toArticleDTO(user: User): ArticleDTO {
+    return ArticleDTO(
+        slug = slug,
+        title = title,
+        description = description,
+        body = body,
+        tagList = tagList.map { it.toString() },
+        author = author.toProfileDTO(),
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        favoritesCount = favoritesCount,
+        favorited = user.isFavoriteArticle(this)
+    )
+}
+
+fun Article.toArticleDTO(): ArticleDTO {
+    return ArticleDTO(
+        slug = slug,
+        title = title,
+        description = description,
+        body = body,
+        tagList = tagList.map { it.toString() },
+        author = author.toProfileDTO(),
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        favoritesCount = favoritesCount,
+        favorited = false
+    )
+}

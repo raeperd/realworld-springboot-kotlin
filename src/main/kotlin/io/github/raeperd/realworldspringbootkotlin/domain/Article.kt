@@ -17,9 +17,6 @@ interface Article {
     val createdAt: Instant
     val updatedAt: Instant
     val favoritesCount: Int
-    fun addFavoritedUser(user: User)
-    fun removeFavoritedByUser(user: User)
-    fun isFavoritedByUser(user: User): Boolean
     fun isWrittenBy(user: User): Boolean
 }
 

@@ -32,7 +32,7 @@ class ArticleEntity(
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private val id: Long? = null
+    val id: Long = 0
 
     override var title = title
         set(value) {
@@ -64,22 +64,20 @@ class ArticleEntity(
     @Column(name = "updated_at", nullable = false)
     override var updatedAt: Instant = createdAt
 
-    override fun addFavoritedUser(user: User) {
-        user.id?.let { userId -> userFavorited.add(userId) }
-    }
-
-    override fun removeFavoritedByUser(user: User) {
-        user.id?.let { userId -> userFavorited.remove(userId) }
-    }
-
-    override fun isFavoritedByUser(user: User) = userFavorited.contains(user.id)
-
     override fun isWrittenBy(user: User) = author.username == user.username
+
+    fun addFavoritesByUser(user: UserEntity) {
+        userFavorited.add(user.id)
+    }
+
+    fun removeFavoritesByUser(user: UserEntity) {
+        userFavorited.remove(user.id)
+    }
 
     @ElementCollection
     @CollectionTable(name = "article_favorites", joinColumns = [JoinColumn(name = "article_id")])
     @Column(name = "user_id")
-    private val userFavorited: MutableList<Long> = mutableListOf()
+    private val userFavorited: MutableSet<Long> = mutableSetOf()
 }
 
 @Table(name = "tags")
@@ -89,7 +87,7 @@ class TagEntity(
 ) : Tag {
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private val id: Long? = null
+    private val id: Long = 0
 
     override fun toString(): String {
         return name

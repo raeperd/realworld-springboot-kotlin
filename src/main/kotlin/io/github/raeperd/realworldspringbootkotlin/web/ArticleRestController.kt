@@ -38,22 +38,10 @@ class ArticleRestController(
     }
 
     @GetMapping("/articles")
-    fun getArticles(pageable: Pageable, param: ArticleQueryParam): MultipleArticleModel {
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam, payload: JWTPayload?): MultipleArticleModel {
         return articleService.getArticles(pageable, param)
             .toMultipleArticleModel()
     }
-
-    @PostMapping("/articles/{slug}/favorite")
-    fun postArticleFavoriteBySlug(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
-        return articleService.favoriteArticle(payload.sub, slug).toArticleModel()
-    }
-
-    @DeleteMapping("/articles/{slug}/favorite")
-    fun deleteArticleFavoriteBySlug(@PathVariable slug: String, payload: JWTPayload): ArticleModel {
-        return articleService.unfavoriteArticle(payload.sub, slug).toArticleModel()
-    }
-
-    private fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
 
     private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, content.size)
 }
@@ -95,3 +83,5 @@ data class ArticlePutDTO(
 data class ArticleModel(val article: ArticleDTO)
 
 data class MultipleArticleModel(val articles: List<ArticleDTO>, val articlesCount: Int)
+
+fun ArticleDTO.toArticleModel(): ArticleModel = ArticleModel(this)
