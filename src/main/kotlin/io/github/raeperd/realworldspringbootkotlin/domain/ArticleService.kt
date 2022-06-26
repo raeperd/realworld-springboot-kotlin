@@ -48,9 +48,11 @@ class ArticleService(
         articleRepository.deleteArticle(article)
     }
 
-    fun getArticles(pageable: Pageable, param: ArticleQueryParam): Page<ArticleDTO> {
-        return articleRepository.getAllArticles(pageable, param)
-            .map { it.toArticleDTO() }
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam, viewerId: Long? = null): Page<ArticleDTO> {
+        val articles = articleRepository.getAllArticles(pageable, param)
+        return viewerId?.let { id -> userRepository.findUserByIdOrThrow(id) }
+            ?.let { user -> articles.map { it.toArticleDTO(user) } }
+            ?: articles.map { it.toArticleDTO() }
     }
 
     fun favoriteArticle(userId: Long, slug: String): ArticleDTO {

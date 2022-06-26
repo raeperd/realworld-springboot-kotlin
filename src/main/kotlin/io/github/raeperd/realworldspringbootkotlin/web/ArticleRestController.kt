@@ -38,7 +38,7 @@ class ArticleRestController(
     }
 
     @GetMapping("/articles")
-    fun getArticles(pageable: Pageable, param: ArticleQueryParam): MultipleArticleModel {
+    fun getArticles(pageable: Pageable, param: ArticleQueryParam, payload: JWTPayload?): MultipleArticleModel {
         return articleService.getArticles(pageable, param)
             .toMultipleArticleModel()
     }
