@@ -60,7 +60,7 @@ data class ArticleDTO(
     val favorited: Boolean
 )
 
-fun Article.toArticleDTO(user: User): ArticleDTO {
+fun Article.toArticleDTO(user: User, favoritesCount: Int = this.favoritesCount): ArticleDTO {
     return ArticleDTO(
         slug = slug,
         title = title,

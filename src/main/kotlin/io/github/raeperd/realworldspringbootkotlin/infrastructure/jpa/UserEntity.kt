@@ -50,19 +50,15 @@ class UserEntity(
         followingUsers.remove(userToUnFollow.id)
     }
 
-    override fun favoriteArticle(article: Article) {
-        checkArticleEntity(article)
-            .also { articleEntity ->
-                favoriteArticles.add(articleEntity.id)
-                articleEntity.addFavoritesByUser(this)
-            }
+    override fun favoriteArticle(article: Article): Boolean {
+        return checkArticleEntity(article)
+            .let { articleEntity -> favoriteArticles.add(articleEntity.id) }
     }
 
-    override fun unfavoriteArticle(article: Article) {
-        checkArticleEntity(article)
-            .also { articleEntity ->
+    override fun unfavoriteArticle(article: Article): Boolean {
+        return checkArticleEntity(article)
+            .let { articleEntity ->
                 favoriteArticles.remove(articleEntity.id)
-                articleEntity.removeFavoritesByUser(this)
             }
     }
 

@@ -17,8 +17,8 @@ interface User : Profile {
     fun viewUserProfile(user: User): Profile
     fun followUser(userToFollow: User)
     fun unfollowUser(userToUnFollow: User)
-    fun favoriteArticle(article: Article)
-    fun unfavoriteArticle(article: Article)
+    fun favoriteArticle(article: Article): Boolean
+    fun unfavoriteArticle(article: Article): Boolean
     fun isFavoriteArticle(article: Article): Boolean
 }
 

@@ -66,14 +66,6 @@ class ArticleEntity(
 
     override fun isWrittenBy(user: User) = author.username == user.username
 
-    fun addFavoritesByUser(user: UserEntity) {
-        userFavorited.add(user.id)
-    }
-
-    fun removeFavoritesByUser(user: UserEntity) {
-        userFavorited.remove(user.id)
-    }
-
     @ElementCollection
     @CollectionTable(name = "article_favorites", joinColumns = [JoinColumn(name = "article_id")])
     @Column(name = "user_id")

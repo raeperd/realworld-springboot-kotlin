@@ -14,8 +14,10 @@ class ArticleFavoriteService(
         val article = articleRepository.findArticleBySlugOrThrow(slug)
         return userRepository.findUserByIdOrThrow(userId)
             .let { user ->
-                user.favoriteArticle(article)
-                article.toArticleDTO(user)
+                if (user.favoriteArticle(article))
+                    article.toDtoAfterFavorite(user)
+                else
+                    article.toArticleDTO(user)
             }
     }
 
@@ -23,8 +25,13 @@ class ArticleFavoriteService(
         val article = articleRepository.findArticleBySlugOrThrow(slug)
         return userRepository.findUserByIdOrThrow(userId)
             .let { user ->
-                user.unfavoriteArticle(article)
-                article.toArticleDTO(user)
+                if (user.unfavoriteArticle(article))
+                    article.toDtoAfterUnFavorite(user)
+                else
+                    article.toArticleDTO(user)
             }
     }
+
+    fun Article.toDtoAfterFavorite(user: User) = toArticleDTO(user, favoritesCount + 1)
+    fun Article.toDtoAfterUnFavorite(user: User) = toArticleDTO(user, favoritesCount - 1)
 }
