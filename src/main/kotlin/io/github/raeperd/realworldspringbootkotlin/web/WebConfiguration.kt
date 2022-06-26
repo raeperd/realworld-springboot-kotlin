@@ -36,7 +36,8 @@ class WebConfiguration : WebMvcConfigurer {
                 HttpRequestMeta(POST, "/users"),
                 HttpRequestMeta(POST, "/users/login"),
                 HttpRequestMeta(GET, "/profiles"),
-                HttpRequestMeta(GET, "/articles")
+                HttpRequestMeta(GET, "/articles"),
+                HttpRequestMeta(GET, "/tags"),
             ),
             mapper = mapper
         )
