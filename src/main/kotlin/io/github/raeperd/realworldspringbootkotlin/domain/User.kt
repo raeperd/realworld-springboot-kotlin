@@ -11,7 +11,7 @@ interface Profile {
 }
 
 interface User : Profile {
-    val id: Long?
+    val id: Long
     var email: String
     var password: Password
     fun viewUserProfile(user: User): Profile
@@ -19,6 +19,7 @@ interface User : Profile {
     fun unfollowUser(userToUnFollow: User)
     fun favoriteArticle(article: Article)
     fun unfavoriteArticle(article: Article)
+    fun isFavoriteArticle(article: Article): Boolean
 }
 
 @Embeddable

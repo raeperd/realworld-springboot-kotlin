@@ -7,22 +7,24 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 @Service
 class ArticleFavoriteService(
-    private val userRepository: ReadOnlyUserRepository,
+    private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository
 ) {
     fun favoriteArticle(userId: Long, slug: String): ArticleDTO {
-        val user = userRepository.findUserByIdOrThrow(userId)
         val article = articleRepository.findArticleBySlugOrThrow(slug)
-        user.favoriteArticle(article)
-        return articleRepository.saveArticle(article)
-            .toArticleDTO(user)
+        return userRepository.findUserByIdOrThrow(userId)
+            .let { user ->
+                user.favoriteArticle(article)
+                article.toArticleDTO(user)
+            }
     }
 
     fun unfavoriteArticle(userId: Long, slug: String): ArticleDTO {
-        val user = userRepository.findUserByIdOrThrow(userId)
         val article = articleRepository.findArticleBySlugOrThrow(slug)
-        user.unfavoriteArticle(article)
-        return articleRepository.saveArticle(article)
-            .toArticleDTO(user)
+        return userRepository.findUserByIdOrThrow(userId)
+            .let { user ->
+                user.unfavoriteArticle(article)
+                article.toArticleDTO(user)
+            }
     }
 }

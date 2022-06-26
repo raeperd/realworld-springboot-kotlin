@@ -30,13 +30,21 @@ class ArticleEntityRepositoryTest @Autowired constructor(
 
     @Test
     fun `when user favorite article expect persisted`() {
-        val user = userRepository.saveMockUser()
+        val article = userRepository.saveMockUser("author")
+            .let { author -> articleRepository.saveMockArticle(author) }
 
-        val articleSaved = articleRepository.saveMockArticle(user)
-            .also { article -> user.favoriteArticle(article) }
-            .let { articleUpdated -> articleRepository.save(articleUpdated) }
+        val fan = userRepository.saveMockUser("user")
+            .also { user -> user.favoriteArticle(article) }
+            .let { user -> userRepository.saveUser(user) }
 
-        assertThat(articleSaved.isFavoritedByUser(user)).isTrue
+        assertThat(fan.isFavoriteArticle(article)).isTrue
+
+        val notFan = fan.let { user ->
+            user.unfavoriteArticle(article)
+            userRepository.saveUser(user)
+        }
+
+        assertThat(notFan.isFavoriteArticle(article)).isFalse
     }
 
     @Test

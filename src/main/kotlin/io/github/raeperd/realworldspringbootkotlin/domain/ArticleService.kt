@@ -81,7 +81,7 @@ fun Article.toArticleDTO(user: User): ArticleDTO {
         createdAt = createdAt,
         updatedAt = updatedAt,
         favoritesCount = favoritesCount,
-        favorited = isFavoritedByUser(user)
+        favorited = user.isFavoriteArticle(this)
     )
 }
 
