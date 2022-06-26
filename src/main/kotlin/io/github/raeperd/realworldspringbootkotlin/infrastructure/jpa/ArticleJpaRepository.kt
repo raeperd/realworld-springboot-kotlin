@@ -19,6 +19,13 @@ class ArticleJpaRepository(
         return articleEntityRepository.findAll(createSpecification(param), pageable)
     }
 
+    override fun getFeed(pageable: Pageable, viewer: User): Page<out Article> {
+        if (viewer !is UserEntity) {
+            handleIllegalUserArgument(viewer)
+        }
+        return articleEntityRepository.findAllByAuthorIdIsIn(viewer.followings, pageable)
+    }
+
     override fun findArticleBySlug(slug: String): Article? {
         return articleEntityRepository.findFirstBySlug(slug)
     }
@@ -32,7 +39,7 @@ class ArticleJpaRepository(
 
     override fun saveNewArticle(author: User, form: ArticleCreateForm): Article {
         if (author !is UserEntity) {
-            throw IllegalArgumentException("Expected UserEntity but ${author.javaClass} given")
+            handleIllegalUserArgument(author)
         }
         return tagEntityRepository.findOrSaveAllTagsByName(form.tagList)
             .let { tags -> author.writeArticle(form, tags) }
@@ -48,6 +55,10 @@ class ArticleJpaRepository(
 
     private fun handleIllegalArticleArgument(article: Article): Nothing {
         throw IllegalArgumentException("Expected ArticleEntity but ${article.javaClass} given")
+    }
+
+    private fun handleIllegalUserArgument(user: User): Nothing {
+        throw IllegalArgumentException("Expected UserEntity but ${user.javaClass} given")
     }
 
     private fun TagEntityRepository.findOrSaveAllTagsByName(names: List<String>): List<TagEntity> {
@@ -79,6 +90,9 @@ interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>, JpaSpeci
 
     @EntityGraph(attributePaths = ["author"])
     override fun findAll(spec: Specification<ArticleEntity>?, pageable: Pageable): Page<ArticleEntity>
+
+    @EntityGraph(attributePaths = ["author"])
+    fun findAllByAuthorIdIsIn(ids: Collection<Long>, pageable: Pageable): Page<ArticleEntity>
 }
 
 interface TagEntityRepository : JpaRepository<TagEntity, Long> {

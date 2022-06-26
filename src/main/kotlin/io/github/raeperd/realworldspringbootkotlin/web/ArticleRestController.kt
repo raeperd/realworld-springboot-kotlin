@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 class ArticleRestController(
-    private val articleService: ArticleService
+    private val articleService: ArticleService,
+    private val articleQueryService: ArticleQueryService
 ) {
     @ResponseStatus(CREATED)
     @PostMapping("/articles")
@@ -39,7 +40,13 @@ class ArticleRestController(
 
     @GetMapping("/articles")
     fun getArticles(pageable: Pageable, param: ArticleQueryParam, payload: JWTPayload?): MultipleArticleModel {
-        return articleService.getArticles(pageable, param)
+        return articleQueryService.getArticles(pageable, param)
+            .toMultipleArticleModel()
+    }
+
+    @GetMapping("/articles/feed")
+    fun getArticlesFeed(pageable: Pageable, payload: JWTPayload): MultipleArticleModel {
+        return articleQueryService.getFeed(payload.sub, pageable)
             .toMultipleArticleModel()
     }
 
