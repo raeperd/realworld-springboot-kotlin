@@ -2,10 +2,11 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleQueryParam
 import org.springframework.data.jpa.domain.Specification
+import java.time.Instant
 import javax.persistence.criteria.JoinType
 
 fun createSpecification(queryParam: ArticleQueryParam): Specification<ArticleEntity> {
-    var specification = Specification.where<ArticleEntity>(null)
+    var specification = orderByCreatedDate()
     if (queryParam.author != null) {
         specification = specification.and(hasAuthor(queryParam.author))
     }
@@ -16,6 +17,13 @@ fun createSpecification(queryParam: ArticleQueryParam): Specification<ArticleEnt
         specification = specification.and(favoritedBy(queryParam.favorited))
     }
     return specification
+}
+
+private fun orderByCreatedDate(): Specification<ArticleEntity> {
+    return Specification<ArticleEntity> { root, query, criteriaBuilder ->
+        query.orderBy(criteriaBuilder.desc(root.get<Instant>("createdAt")))
+        criteriaBuilder.conjunction()
+    }
 }
 
 private fun hasAuthor(author: String): Specification<ArticleEntity> {
