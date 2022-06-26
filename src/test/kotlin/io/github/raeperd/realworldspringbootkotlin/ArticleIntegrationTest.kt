@@ -122,6 +122,18 @@ class ArticleIntegrationTest(
             .apply { assertHasSize(1) }
     }
 
+    @Test
+    fun `when get feed expect valid response`() {
+        val author = mockMvc.postMockUser("author")
+        val viewer = mockMvc.postMockUser("viewer")
+        postArticleSamples(author, 21, listOf("tag1"))
+
+        mockMvc.get("/articles/feed") { withAuthToken(viewer.token) }
+            .andExpect { status { isOk() } }
+            .andReturnMultipleArticles()
+            .apply { assertHasSize(0) }
+    }
+
     private fun postArticleSamples(author: UserDTO, count: Int, tags: List<String>) {
         repeat(count) { postSampleArticle(author, tags) }
     }
