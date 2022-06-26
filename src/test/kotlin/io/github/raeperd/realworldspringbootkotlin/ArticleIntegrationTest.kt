@@ -89,7 +89,10 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertHasSize(20) }
+            .apply {
+                assertHasSize(20)
+                assertOrderedByCreatedDate()
+            }
 
         mockMvc.get("/articles?limit=100")
             .andExpect { status { isOk() } }
@@ -131,7 +134,10 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles/feed") { withAuthToken(viewer.token) }
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertHasSize(0) }
+            .apply {
+                assertHasSize(0)
+                assertOrderedByCreatedDate()
+            }
 
         mockMvc.post("/profiles/${author.username}/follow") { withAuthToken(viewer.token) }
             .andExpect { status { isOk() } }
@@ -170,6 +176,10 @@ class ArticleIntegrationTest(
 
     private fun MultipleArticleModel.assertHasSize(size: Int) {
         assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(size)
+    }
+
+    private fun MultipleArticleModel.assertOrderedByCreatedDate() {
+        assertThat(articles.map { it.createdAt }.reversed()).isSorted
     }
 }
 

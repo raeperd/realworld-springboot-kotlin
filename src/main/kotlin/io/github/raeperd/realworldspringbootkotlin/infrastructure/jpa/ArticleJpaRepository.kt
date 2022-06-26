@@ -23,7 +23,7 @@ class ArticleJpaRepository(
         if (viewer !is UserEntity) {
             handleIllegalUserArgument(viewer)
         }
-        return articleEntityRepository.findAllByAuthorIdIsIn(viewer.followings, pageable)
+        return articleEntityRepository.findAllByAuthorIdIsInOrderByCreatedAtDesc(viewer.followings, pageable)
     }
 
     override fun findArticleBySlug(slug: String): Article? {
@@ -92,7 +92,7 @@ interface ArticleEntityRepository : JpaRepository<ArticleEntity, Long>, JpaSpeci
     override fun findAll(spec: Specification<ArticleEntity>?, pageable: Pageable): Page<ArticleEntity>
 
     @EntityGraph(attributePaths = ["author"])
-    fun findAllByAuthorIdIsIn(ids: Collection<Long>, pageable: Pageable): Page<ArticleEntity>
+    fun findAllByAuthorIdIsInOrderByCreatedAtDesc(ids: Collection<Long>, pageable: Pageable): Page<ArticleEntity>
 }
 
 interface TagEntityRepository : JpaRepository<TagEntity, Long> {
