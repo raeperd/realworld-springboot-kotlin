@@ -21,9 +21,6 @@ class ArticleFavoriteService(
     fun unfavoriteArticle(userId: Long, slug: String): ArticleDTO {
         val user = userRepository.findUserByIdOrThrow(userId)
         val article = articleRepository.findArticleBySlugOrThrow(slug)
-        if (!article.isFavoritedByUser(user)) {
-            return article.toArticleDTO()
-        }
         user.unfavoriteArticle(article)
         return articleRepository.saveArticle(article)
             .toArticleDTO(user)
