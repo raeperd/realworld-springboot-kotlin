@@ -32,6 +32,7 @@ interface Tag {
 
 interface ArticleRepository {
     fun getAllArticles(pageable: Pageable, param: ArticleQueryParam): Page<out Article>
+    fun getFeed(pageable: Pageable, viewer: User): Page<out Article>
 
     fun findArticleBySlug(slug: String): Article?
     fun findArticleBySlugOrThrow(slug: String): Article =

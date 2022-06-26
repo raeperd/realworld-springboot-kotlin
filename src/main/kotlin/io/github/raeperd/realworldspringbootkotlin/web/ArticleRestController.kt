@@ -44,6 +44,12 @@ class ArticleRestController(
             .toMultipleArticleModel()
     }
 
+    @GetMapping("/articles/feed")
+    fun getArticlesFeed(pageable: Pageable, payload: JWTPayload): MultipleArticleModel {
+        return articleQueryService.getFeed(payload.sub, pageable)
+            .toMultipleArticleModel()
+    }
+
     private fun Page<ArticleDTO>.toMultipleArticleModel() = MultipleArticleModel(content, content.size)
 }
 

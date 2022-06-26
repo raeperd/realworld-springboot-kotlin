@@ -17,4 +17,12 @@ class ArticleQueryService(
             ?.let { user -> articles.map { it.toArticleDTO(user) } }
             ?: articles.map { it.toArticleDTO() }
     }
+
+    fun getFeed(viewerId: Long, pageable: Pageable): Page<ArticleDTO> {
+        return userRepository.findUserByIdOrThrow(viewerId)
+            .let { viewer ->
+                articleRepository.getFeed(pageable, viewer)
+                    .map { article -> article.toArticleDTO(viewer) }
+            }
+    }
 }

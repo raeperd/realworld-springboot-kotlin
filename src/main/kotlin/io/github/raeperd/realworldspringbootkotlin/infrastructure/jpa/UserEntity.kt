@@ -19,6 +19,9 @@ class UserEntity(
 
     ) : User, ProfileEntity(username, image, bio) {
 
+    val followings: Set<Long>
+        get() = followingUsers.toSet()
+
     @ElementCollection
     @CollectionTable(name = "user_followings", joinColumns = [JoinColumn(name = "follower_id")])
     @Column(name = "followee_id")
