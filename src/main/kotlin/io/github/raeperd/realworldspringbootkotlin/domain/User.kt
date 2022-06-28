@@ -20,6 +20,7 @@ interface User : Profile {
     fun favoriteArticle(article: Article): Boolean
     fun unfavoriteArticle(article: Article): Boolean
     fun isFavoriteArticle(article: Article): Boolean
+    fun addComment(article: Article, form: CommentCreateForm): Comment
 }
 
 @Embeddable

@@ -25,6 +25,10 @@ class ArticleEntity(
     @ManyToMany(fetch = LAZY)
     override val tagList: MutableList<TagEntity>,
 
+    @JoinColumn(name = "article_id", referencedColumnName = "id")
+    @OneToMany(fetch = LAZY, cascade = [CascadeType.ALL])
+    override val comments: MutableList<CommentEntity>,
+
     title: String,
     description: String,
     body: String,
@@ -65,6 +69,10 @@ class ArticleEntity(
     override var updatedAt: Instant = createdAt
 
     override fun isWrittenBy(user: User) = author.username == user.username
+
+    fun addComment(commentEntity: CommentEntity): Boolean {
+        return comments.add(commentEntity)
+    }
 
     @ElementCollection
     @CollectionTable(name = "article_favorites", joinColumns = [JoinColumn(name = "article_id")])

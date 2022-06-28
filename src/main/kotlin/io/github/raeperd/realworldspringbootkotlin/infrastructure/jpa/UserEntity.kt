@@ -1,9 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Article
-import io.github.raeperd.realworldspringbootkotlin.domain.Password
-import io.github.raeperd.realworldspringbootkotlin.domain.Profile
-import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.*
 import javax.persistence.*
 
 @Entity
@@ -65,6 +62,12 @@ class UserEntity(
     override fun isFavoriteArticle(article: Article): Boolean {
         return checkArticleEntity(article)
             .let { articleEntity -> favoriteArticles.contains(articleEntity.id) }
+    }
+
+    override fun addComment(article: Article, form: CommentCreateForm): Comment {
+        val comment = CommentEntity(form.body, this)
+        checkArticleEntity(article).addComment(comment)
+        return comment
     }
 
     private fun checkArticleEntity(article: Article): ArticleEntity {

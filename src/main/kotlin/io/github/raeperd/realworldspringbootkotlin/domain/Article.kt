@@ -13,6 +13,7 @@ interface Article {
     var description: String
     var body: String
     val tagList: List<Tag>
+    val comments: List<Comment>
     val author: Profile
     val createdAt: Instant
     val updatedAt: Instant

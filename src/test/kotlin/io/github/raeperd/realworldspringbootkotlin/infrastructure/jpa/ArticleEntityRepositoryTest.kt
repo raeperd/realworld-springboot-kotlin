@@ -21,7 +21,7 @@ class ArticleEntityRepositoryTest @Autowired constructor(
     fun `when save new article with user expect to be persisted`() {
         val user = userRepository.saveMockUser()
 
-        val articleSaved = ArticleEntity(user, mutableListOf(), "", "", "")
+        val articleSaved = ArticleEntity(user, mutableListOf(), mutableListOf(), "", "", "")
             .let { article -> articleRepository.save(article) }
             .let { articleSaved -> articleRepository.findFirstBySlug(articleSaved.slug) }
 
@@ -80,6 +80,7 @@ class ArticleEntityRepositoryTest @Autowired constructor(
             ArticleEntity(
                 author = user,
                 tagList = tags.map { testEntityManager.persist(TagEntity(it)) }.toMutableList(),
+                comments = mutableListOf(),
                 "Mock title",
                 "Mock description",
                 "Mock Body",

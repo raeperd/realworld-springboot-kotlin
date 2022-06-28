@@ -77,6 +77,7 @@ class ArticleJpaRepository(
         return ArticleEntity(
             author = this,
             tagList = tags.toMutableList(),
+            comments = mutableListOf(),
             title = form.title,
             description = form.description,
             body = form.body,

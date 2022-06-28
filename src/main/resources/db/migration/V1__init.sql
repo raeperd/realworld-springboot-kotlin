@@ -17,7 +17,6 @@ create table if not exists user_followings
     constraint fk_followee foreign key (followee_id) references users (id) on delete cascade
 );
 
-
 create table if not exists articles
 (
     id          BIGINT primary key,
@@ -31,6 +30,18 @@ create table if not exists articles
     constraint fk_author foreign key (author_id) references users (id) on delete cascade
 );
 
+create table if not exists comments
+(
+    id         BIGINT primary key,
+    author_id  BIGINT       not null,
+    article_id BIGINT       not null,
+    body       VARCHAR(255) not null,
+    created_at TIMESTAMP    not null default current_timestamp,
+    updated_at TIMESTAMP    not null default current_timestamp,
+    constraint fk_comment_author foreign key (author_id) references users (id) on delete cascade,
+    constraint fk_article foreign key (article_id) references articles (id) on delete cascade
+);
+
 create table if not exists tags
 (
     id   BIGINT primary key,
@@ -42,7 +53,7 @@ create table if not exists articles_tags
     article_id BIGINT not null,
     tag_id     BIGINT not null,
     primary key (article_id, tag_id),
-    constraint fk_article foreign key (article_id) references articles (id) on delete cascade,
+    constraint fk_article_tag foreign key (article_id) references articles (id) on delete cascade,
     constraint fk_tag foreign key (tag_id) references tags (id) on delete cascade
 );
 
