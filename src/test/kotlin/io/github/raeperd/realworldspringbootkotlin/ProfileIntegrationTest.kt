@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.spring.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.util.spring.responseJson
+import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,10 +34,9 @@ class ProfileIntegrationTest(
     @Test
     fun `when get profile expect valid json response`() {
         mockMvc.get("/profiles/invalid-username")
-            .andExpect {
-                status { isNotFound() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isNotFound() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
         mockMvc.postUsers(email, "password", username)
 

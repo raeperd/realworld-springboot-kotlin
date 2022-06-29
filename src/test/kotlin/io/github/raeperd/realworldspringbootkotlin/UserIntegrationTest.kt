@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.spring.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
-import io.github.raeperd.realworldspringbootkotlin.web.UserModel
-import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO
-import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
+import io.github.raeperd.realworldspringbootkotlin.web.*
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,16 +38,14 @@ class UserIntegrationTest(
             }
 
         mockMvc.postUsersLogin(email, "bad-password")
-            .andExpect {
-                status { isBadRequest() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isBadRequest() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
         mockMvc.postUsersLogin("bad-email@email.com", password)
-            .andExpect {
-                status { isNotFound() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isNotFound() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
         mockMvc.postUsersLogin(email, password)
             .andExpect {
@@ -62,16 +57,14 @@ class UserIntegrationTest(
     @Test
     fun `when get put user expect valid response`() {
         mockMvc.get("/user")
-            .andExpect {
-                status { isForbidden() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isForbidden() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
         mockMvc.getUser("INVALID TOKEN")
-            .andExpect {
-                status { isBadRequest() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isBadRequest() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
         val token = mockMvc.postUsers(email, password, username).andReturnUserToken()
         mockMvc.getUser(token)
