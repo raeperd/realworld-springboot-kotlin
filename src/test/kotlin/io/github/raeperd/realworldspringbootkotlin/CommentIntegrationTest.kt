@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.CommentDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
@@ -9,6 +10,7 @@ import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto.CommentPostDtoNested
+import io.github.raeperd.realworldspringbootkotlin.web.MultipleCommentModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -17,7 +19,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.time.Instant
+import java.time.ZoneOffset
 
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
@@ -40,10 +45,23 @@ class CommentIntegrationTest(
         mockMvc.postComments("not-exists-slug", author, commentPostDto)
             .andExpect { status { isNotFound() } }
 
-        mockMvc.postComments(articleDto.slug, author, commentPostDto)
+        mockMvc.get("/articles/${articleDto.slug}/comments")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>().comments
+            .apply { assertThat(this).isEmpty() }
+
+        val commentDto = mockMvc.postComments(articleDto.slug, author, commentPostDto)
             .andExpect { status { isCreated() } }
             .andReturnResponseBody<CommentModel>().comment
-            .apply { assertThat(body).isEqualTo(commentPostDto.body) }
+            .apply { assertThatValidCommentWithBody(commentPostDto.body) }
+
+        mockMvc.get("/articles/${articleDto.slug}/comments")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>().comments
+            .apply {
+                assertThat(this).isNotEmpty
+                this.first().assertThatIsEqualTo(commentDto)
+            }
     }
 
     private fun MockMvc.postSampleArticles(): ArticleDTO {
@@ -65,4 +83,24 @@ class CommentIntegrationTest(
 
     private val CommentPostDto.body: String
         get() = comment.body
+
+    private fun CommentDTO.assertThatValidCommentWithBody(body: String) {
+        assertThat(this.body).isEqualTo(body)
+        assertThat(id).isGreaterThan(0)
+        assertThat(createdAt).isEqualTo(updatedAt)
+        assertThat(author.username).isNotBlank
+    }
+
+    private fun CommentDTO.assertThatIsEqualTo(dto: CommentDTO) {
+        assertThat(id).isEqualTo(dto.id)
+        createdAt.assertThatIsEqualToIgnoreNanos(updatedAt)
+        createdAt.assertThatIsEqualToIgnoreNanos(dto.createdAt)
+        updatedAt.assertThatIsEqualToIgnoreNanos(dto.updatedAt)
+        assertThat(body).isEqualTo(dto.body)
+        assertThat(author).isEqualTo(dto.author)
+    }
+
+    private fun Instant.assertThatIsEqualToIgnoreNanos(other: Instant) {
+        assertThat(atZone(ZoneOffset.UTC)).isEqualToIgnoringNanos(other.atZone(ZoneOffset.UTC))
+    }
 }

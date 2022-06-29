@@ -19,7 +19,15 @@ class CommentRestController(
             .toCommentModel()
     }
 
+    @GetMapping("/articles/{slug}/comments")
+    fun getComments(@PathVariable slug: String): MultipleCommentModel {
+        return commentService.getAllComments(slug)
+            .toMultipleCommentModel()
+    }
+
     private fun CommentDTO.toCommentModel() = CommentModel(this)
+
+    private fun List<CommentDTO>.toMultipleCommentModel() = MultipleCommentModel(this)
 }
 
 data class CommentPostDto(
@@ -34,4 +42,8 @@ data class CommentPostDto(
 
 data class CommentModel(
     val comment: CommentDTO
+)
+
+data class MultipleCommentModel(
+    val comments: List<CommentDTO>
 )
