@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.CommentDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
@@ -43,7 +44,7 @@ class CommentIntegrationTest(
         mockMvc.postComments(articleDto.slug, author, commentPostDto)
             .andExpect { status { isCreated() } }
             .andReturnResponseBody<CommentModel>().comment
-            .apply { assertThat(body).isEqualTo(commentPostDto.body) }
+            .apply { assertThatValidCommentWithBody(commentPostDto.body) }
     }
 
     private fun MockMvc.postSampleArticles(): ArticleDTO {
@@ -65,4 +66,11 @@ class CommentIntegrationTest(
 
     private val CommentPostDto.body: String
         get() = comment.body
+
+    private fun CommentDTO.assertThatValidCommentWithBody(body: String) {
+        assertThat(this.body).isEqualTo(body)
+        assertThat(id).isGreaterThan(0)
+        assertThat(createdAt).isEqualTo(updatedAt)
+        assertThat(author.username).isNotBlank
+    }
 }
