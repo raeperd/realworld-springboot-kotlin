@@ -12,8 +12,11 @@ class CommentService(
 ) {
     fun saveNewComments(authorId: Long, slug: String, form: CommentCreateForm): CommentDTO {
         val author = userRepository.findUserByIdOrThrow(authorId)
-        val article = articleRepository.findArticleBySlugOrThrow(slug)
-        return author.addComment(article, form).toDTO()
+        return articleRepository.findArticleBySlugOrThrow(slug)
+            .let { article ->
+                author.addComment(article, form)
+                articleRepository.saveArticle(article)
+            }.comments.last().toDTO()
     }
 
     private fun Comment.toDTO() =
