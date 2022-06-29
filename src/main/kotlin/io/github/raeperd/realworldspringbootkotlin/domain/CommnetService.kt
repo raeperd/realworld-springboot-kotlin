@@ -19,6 +19,12 @@ class CommentService(
             }.comments.last().toDTO()
     }
 
+    @Transactional(readOnly = true)
+    fun getAllComments(slug: String): List<CommentDTO> {
+        return articleRepository.findArticleBySlugOrThrow(slug).comments
+            .map { it.toDTO() }
+    }
+
     private fun Comment.toDTO() =
         CommentDTO(id, createdAt, updatedAt, body, author.toProfileDTO())
 }
