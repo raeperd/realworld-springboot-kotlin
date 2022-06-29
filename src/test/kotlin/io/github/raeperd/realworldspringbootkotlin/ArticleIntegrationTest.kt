@@ -4,9 +4,9 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
+import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.web.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested

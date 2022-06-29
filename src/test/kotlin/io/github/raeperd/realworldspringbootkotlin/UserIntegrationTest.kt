@@ -1,10 +1,10 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.util.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
+import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.notEmptyErrorResponse
 import io.github.raeperd.realworldspringbootkotlin.web.UserLoginDTO
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserPostDTO

@@ -3,9 +3,9 @@ package io.github.raeperd.realworldspringbootkotlin
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.CommentDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
+import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
+import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto

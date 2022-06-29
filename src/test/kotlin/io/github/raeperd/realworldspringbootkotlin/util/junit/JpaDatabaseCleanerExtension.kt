@@ -1,4 +1,4 @@
-package io.github.raeperd.realworldspringbootkotlin.util
+package io.github.raeperd.realworldspringbootkotlin.util.junit
 
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
