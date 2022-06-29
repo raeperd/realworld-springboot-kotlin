@@ -21,6 +21,8 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.time.Instant
+import java.time.ZoneOffset
 
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
@@ -58,7 +60,7 @@ class CommentIntegrationTest(
             .andReturnResponseBody<MultipleCommentModel>().comments
             .apply {
                 assertThat(this).isNotEmpty
-                assertThat(this.first()).isEqualTo(commentDto)
+                this.first().assertThatIsEqualTo(commentDto)
             }
     }
 
@@ -87,5 +89,18 @@ class CommentIntegrationTest(
         assertThat(id).isGreaterThan(0)
         assertThat(createdAt).isEqualTo(updatedAt)
         assertThat(author.username).isNotBlank
+    }
+
+    private fun CommentDTO.assertThatIsEqualTo(dto: CommentDTO) {
+        assertThat(id).isEqualTo(dto.id)
+        createdAt.assertThatIsEqualToIgnoreNanos(updatedAt)
+        createdAt.assertThatIsEqualToIgnoreNanos(dto.createdAt)
+        updatedAt.assertThatIsEqualToIgnoreNanos(dto.updatedAt)
+        assertThat(body).isEqualTo(dto.body)
+        assertThat(author).isEqualTo(dto.author)
+    }
+
+    private fun Instant.assertThatIsEqualToIgnoreNanos(other: Instant) {
+        assertThat(atZone(ZoneOffset.UTC)).isEqualToIgnoringNanos(other.atZone(ZoneOffset.UTC))
     }
 }
