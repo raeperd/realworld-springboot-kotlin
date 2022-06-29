@@ -10,6 +10,7 @@ import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto.CommentPostDtoNested
+import io.github.raeperd.realworldspringbootkotlin.web.MultipleCommentModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
 
@@ -41,10 +43,23 @@ class CommentIntegrationTest(
         mockMvc.postComments("not-exists-slug", author, commentPostDto)
             .andExpect { status { isNotFound() } }
 
-        mockMvc.postComments(articleDto.slug, author, commentPostDto)
+        mockMvc.get("/articles/${articleDto.slug}/comments")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>().comments
+            .apply { assertThat(this).isEmpty() }
+
+        val commentDto = mockMvc.postComments(articleDto.slug, author, commentPostDto)
             .andExpect { status { isCreated() } }
             .andReturnResponseBody<CommentModel>().comment
             .apply { assertThatValidCommentWithBody(commentPostDto.body) }
+
+        mockMvc.get("/articles/${articleDto.slug}/comments")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>().comments
+            .apply {
+                assertThat(this).isNotEmpty
+                assertThat(this.first()).isEqualTo(commentDto)
+            }
     }
 
     private fun MockMvc.postSampleArticles(): ArticleDTO {

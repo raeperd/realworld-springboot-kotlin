@@ -35,3 +35,7 @@ data class CommentPostDto(
 data class CommentModel(
     val comment: CommentDTO
 )
+
+data class MultipleCommentModel(
+    val comments: List<CommentDTO>
+)
