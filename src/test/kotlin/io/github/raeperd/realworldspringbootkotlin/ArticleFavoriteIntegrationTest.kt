@@ -1,5 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin
 
+import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
@@ -23,8 +24,11 @@ class ArticleFavoriteIntegrationTest(
     fun `when post get delete articles favorite expect return valid response`() {
         val celeb = mockMvc.postMockUser("celeb")
         val postDto = createArticlePostDto("Title to favorite")
-        val articleDto = mockMvc.postArticles(celeb, postDto)
+        mockMvc.postArticles(celeb, postDto)
             .andExpect { status { isCreated() } }
+            .andReturnResponseBody<ArticleModel>().article
+
+        val articleDto = mockMvc.getArticlesBySlug(postDto.article.title.slugify())
             .andReturnResponseBody<ArticleModel>().article
 
         val fan = mockMvc.postMockUser("fan")
