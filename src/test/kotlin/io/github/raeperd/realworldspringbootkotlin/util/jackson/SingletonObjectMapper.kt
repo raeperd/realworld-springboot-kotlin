@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import java.text.SimpleDateFormat
 
 object SingletonObjectMapper : ObjectMapper() {
     init {
@@ -22,6 +23,7 @@ object SingletonObjectMapper : ObjectMapper() {
         registerModule(JavaTimeModule())
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
     }
 }
 
