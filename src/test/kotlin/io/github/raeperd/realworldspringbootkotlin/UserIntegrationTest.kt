@@ -1,10 +1,10 @@
 package io.github.raeperd.realworldspringbootkotlin
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.web.*
+import io.github.raeperd.realworldspringbootkotlin.util.spring.*
+import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
+import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import io.github.raeperd.realworldspringbootkotlin.web.UserPutDTO
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
@@ -12,16 +12,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.test.web.servlet.*
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MockMvcResultMatchersDsl
+import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.get
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
 class UserIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
-    @Autowired private val mapper: ObjectMapper
 ) {
     companion object {
         const val email = "user@email.com"
@@ -93,30 +93,6 @@ class UserIntegrationTest(
             .andExpect { status { isOk() } }
     }
 
-    private fun MockMvc.postUsersLogin(email: String, password: String): ResultActionsDsl {
-        return post("/users/login") {
-            contentType = APPLICATION_JSON
-            content = mapper.writeValueAsString(UserLoginDTO(email, password))
-            accept = APPLICATION_JSON
-        }
-    }
-
-    private fun MockMvc.getUser(token: String): ResultActionsDsl {
-        return get("/user") {
-            withAuthToken(token)
-            accept = APPLICATION_JSON
-        }
-    }
-
-    private fun MockMvc.putUser(token: String, dto: UserPutDTO): ResultActionsDsl {
-        return put("/user") {
-            withAuthToken(token)
-            contentType = APPLICATION_JSON
-            content = mapper.writeValueAsString(dto)
-            accept = APPLICATION_JSON
-        }
-    }
-
     private fun MockMvcResultMatchersDsl.validUserDTO(dto: UserPutDTO) {
         validUserDTO(email = dto.user.email, username = dto.user.username, bio = dto.user.bio, image = dto.user.image)
     }
@@ -134,18 +110,6 @@ class UserIntegrationTest(
         jsonPath("user.image", equalTo(image))
     }
 
-}
-
-fun MockHttpServletRequestDsl.withAuthToken(token: String) {
-    header(HttpHeaders.AUTHORIZATION, "Token $token")
-}
-
-fun MockMvc.postUsers(email: String, password: String, username: String): ResultActionsDsl {
-    return post("/users") {
-        contentType = APPLICATION_JSON
-        content = UserPostDTO(email, password, username).toJson()
-        accept = APPLICATION_JSON
-    }
 }
 
 fun ResultActionsDsl.andReturnUserToken(): String {
