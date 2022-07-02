@@ -2,6 +2,8 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postArticles
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postMockUser
 import io.github.raeperd.realworldspringbootkotlin.web.MultipleTagModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
