@@ -6,6 +6,9 @@ import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postArticles
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postMockUser
+import io.github.raeperd.realworldspringbootkotlin.util.spring.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto

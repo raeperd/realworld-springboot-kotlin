@@ -2,7 +2,7 @@ package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

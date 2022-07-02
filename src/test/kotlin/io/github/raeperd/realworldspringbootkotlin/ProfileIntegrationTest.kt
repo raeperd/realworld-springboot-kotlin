@@ -4,6 +4,8 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postUsers
+import io.github.raeperd.realworldspringbootkotlin.util.spring.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel

@@ -4,12 +4,14 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
-import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.web.*
+import io.github.raeperd.realworldspringbootkotlin.util.spring.*
+import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
+import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested
+import io.github.raeperd.realworldspringbootkotlin.web.MultipleArticleModel
+import io.github.raeperd.realworldspringbootkotlin.web.toProfileModel
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.matchesPattern
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.*
 import java.time.Instant
 
@@ -192,35 +193,6 @@ fun createArticlePostDto(title: String, tagList: List<String> = listOf("tag1, ta
     )
 }
 
-fun MockMvc.postMockUser(username: String): UserDTO =
-    postUsers("${username}@email.com", "password", username)
-        .andReturnResponseBody<UserModel>().user
-
-fun MockMvc.postArticles(author: UserDTO, dto: ArticlePostDTO): ResultActionsDsl =
-    post("/articles") {
-        withAuthToken(author.token)
-        contentType = APPLICATION_JSON
-        accept = APPLICATION_JSON
-        content = dto.toJson()
-    }
-
-fun MockMvc.getArticlesBySlug(slug: String, user: UserDTO? = null): ResultActionsDsl =
-    get("/articles/${slug}") {
-        accept = APPLICATION_JSON
-        user?.let { withAuthToken(user.token) }
-    }
-
-private fun MockMvc.postArticles(author: UserDTO, dto: ArticlePostDTONested) =
-    postArticles(author, ArticlePostDTO(dto))
-
-private fun MockMvc.putArticlesBySlug(slug: String, user: UserDTO, dto: ArticlePutDTONested): ResultActionsDsl =
-    put("/articles/${slug}") {
-        contentType = APPLICATION_JSON
-        accept = APPLICATION_JSON
-        withAuthToken(user.token)
-        content = ArticlePutDTO(dto).toJson()
-    }
-
 fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
     jsonPath("article.slug", equalTo(dto.slug))
     jsonPath("article.title", equalTo(dto.title))
@@ -241,11 +213,6 @@ private val datePattern =
     Regex("^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?\$")
         .toPattern()
 
-
-private fun MockMvc.deleteArticleBySlug(slug: String, author: UserDTO): ResultActionsDsl =
-    delete("/articles/$slug") {
-        withAuthToken(author.token)
-    }
 
 private val ArticlePostDTO.slug get() = article.title.slugify()
 
