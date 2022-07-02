@@ -24,12 +24,13 @@ class ArticleFavoriteIntegrationTest(
     fun `when post get delete articles favorite expect return valid response`() {
         val celeb = mockMvc.postMockUser("celeb")
         val postDto = createArticlePostDto("Title to favorite")
-        mockMvc.postArticles(celeb, postDto)
+        val articleDto = mockMvc.postArticles(celeb, postDto)
             .andExpect { status { isCreated() } }
             .andReturnResponseBody<ArticleModel>().article
 
-        val articleDto = mockMvc.getArticlesBySlug(postDto.article.title.slugify())
-            .andReturnResponseBody<ArticleModel>().article
+        mockMvc.getArticlesBySlug(postDto.article.title.slugify())
+            .andReturnResponseBody<ArticleModel>()
+            .apply { assertThat(article).isEqualTo(articleDto) }
 
         val fan = mockMvc.postMockUser("fan")
         mockMvc.post("/articles/${articleDto.slug}/favorite") { withAuthToken(fan.token) }
