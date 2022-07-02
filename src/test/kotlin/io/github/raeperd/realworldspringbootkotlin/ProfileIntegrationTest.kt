@@ -1,13 +1,13 @@
 package io.github.raeperd.realworldspringbootkotlin
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
-import io.github.raeperd.realworldspringbootkotlin.util.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.notEmptyErrorResponse
-import io.github.raeperd.realworldspringbootkotlin.util.responseJson
+import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
+import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ProfileModel
 import io.github.raeperd.realworldspringbootkotlin.web.UserModel
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.post
 @SpringBootTest
 class ProfileIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
-    @Autowired private val mapper: ObjectMapper
 ) {
     companion object {
         const val email = "user@email.com"
@@ -33,57 +32,61 @@ class ProfileIntegrationTest(
     @Test
     fun `when get profile expect valid json response`() {
         mockMvc.get("/profiles/invalid-username")
-            .andExpect {
-                status { isNotFound() }
-                content { notEmptyErrorResponse() }
-            }
+            .andExpect { status { isNotFound() } }
+            .andReturnResponseBody<ErrorResponseDTO>()
+            .apply { assertThat(errors.body).isNotEmpty }
 
-        mockMvc.postUsers(email, "password", username)
+        val userDto = mockMvc.postUsers(email, "password", username)
+            .andReturnResponseBody<UserModel>().user
 
-        mockMvc.get("/profiles/${username}")
-            .andExpect {
-                status { isOk() }
-                content { json(mapper.writeValueAsString(mockProfileModel)) }
-            }
+        mockMvc.get("/profiles/${userDto.username}")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(userDto.toProfileDTO()) }
     }
 
     @Test
     fun `when post profiles follow expect return valid profile`() {
-        val token = mockMvc.postUsers(email, "password", username).andReturnUserToken()
-        val dto = mockMvc.postUsers("celeb@email.com", "password", "celeb")
-            .andReturnResponseBody<UserModel>()
+        val user = mockMvc.postUsers(email, "password", username)
+            .andReturnResponseBody<UserModel>().user
+        val celebProfile = mockMvc.postUsers("celeb@email.com", "password", "celeb")
+            .andReturnResponseBody<UserModel>().user.toProfileDTO()
 
-        mockMvc.post("/profiles/${dto.user.username}/follow") {
-            withAuthToken(token)
-        }.andExpect {
-            status { isOk() }
-            content { responseJson(dto.toProfileDTOWithFollowing(true)) }
-        }
+        mockMvc.get("/profiles/${celebProfile.username}") {
+            withAuthToken(user.token)
+        }.andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = false)) }
 
-        mockMvc.get("/profiles/${dto.user.username}") {
-            withAuthToken(token)
-        }.andExpect { content { responseJson(dto.toProfileDTOWithFollowing(true)) } }
+        mockMvc.post("/profiles/${celebProfile.username}/follow") {
+            withAuthToken(user.token)
+        }.andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = true)) }
 
-        mockMvc.delete("/profiles/${dto.user.username}/follow") {
-            withAuthToken(token)
-        }.andExpect {
-            status { isOk() }
-            content { responseJson(dto.toProfileDTOWithFollowing(false)) }
-        }
+        mockMvc.get("/profiles/${celebProfile.username}") {
+            withAuthToken(user.token)
+        }.andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = true)) }
 
-        mockMvc.get("/profiles/${dto.user.username}") {
-            withAuthToken(token)
-        }.andExpect { content { responseJson(dto.toProfileDTOWithFollowing(false)) } }
+        mockMvc.delete("/profiles/${celebProfile.username}/follow") {
+            withAuthToken(user.token)
+        }.andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = false)) }
+
+        mockMvc.get("/profiles/${celebProfile.username}") {
+            withAuthToken(user.token)
+        }.andExpect { status { isOk() } }
+            .andReturnResponseBody<ProfileModel>()
+            .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = false)) }
     }
 
-    private val mockProfileModel = ProfileModel(
-        ProfileDTO(username, "", null, false)
-    )
-
-    private fun UserModel.toProfileDTOWithFollowing(following: Boolean) = ProfileModel(
-        ProfileDTO(
-            user.username, user.bio, user.image,
-            following
-        )
+    private fun UserDTO.toProfileDTO() = ProfileDTO(
+        username = this.username,
+        bio = this.bio,
+        image = this.image,
+        following = false
     )
 }
