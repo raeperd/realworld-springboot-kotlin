@@ -1,7 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
-import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.slugify
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
@@ -11,16 +10,16 @@ import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePostDTO.ArticlePostDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.ArticlePutDTO.ArticlePutDTONested
 import io.github.raeperd.realworldspringbootkotlin.web.MultipleArticleModel
-import io.github.raeperd.realworldspringbootkotlin.web.toProfileModel
 import org.assertj.core.api.Assertions.assertThat
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.web.servlet.*
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import java.time.Instant
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
@@ -38,16 +37,13 @@ class ArticleIntegrationTest(
 
         val author = mockMvc.postMockUser("author")
         val articleDto = mockMvc.postArticles(author, postDto)
-            .andExpect {
-                status { isCreated() }
-                content { validArticleDTO(postDto, author) }
-            }.andReturnArticleDto()
+            .andExpect { status { isCreated() } }
+            .andReturnArticleDto()
 
         mockMvc.getArticlesBySlug(postDto.slug)
-            .andExpect {
-                status { isOk() }
-                content { validArticleDTO(articleDto) }
-            }
+            .andExpect { status { isOk() } }
+            .andReturnArticleDto()
+            .apply { assertThat(this).isEqualTo(articleDto) }
 
         val viewer = mockMvc.postMockUser("viewer")
         mockMvc.deleteArticleBySlug(postDto.slug, viewer)
@@ -73,12 +69,26 @@ class ArticleIntegrationTest(
 
         putDtoTestCases.forEach { dto ->
             articleDto = mockMvc.putArticlesBySlug(articleDto.slug, author, dto)
-                .andExpect {
-                    status { isOk() }
-                    content { validArticleDTO(articleDto, dto) }
-                }.andReturnArticleDto()
+                .andExpect { status { isOk() } }
+                .andReturnArticleDto()
+                .apply { assertThat(this).isEqualTo(articleDto.copy(dto, updatedAt)) }
         }
     }
+
+    private val putDtoTestCases = listOf(
+        ArticlePutDTONested("New Article Title", null, null),
+        ArticlePutDTONested(null, "new description", null),
+        ArticlePutDTONested(null, null, "new body"),
+        ArticlePutDTONested(null, "new description with body", "new body with description"),
+    )
+
+    private fun ArticleDTO.copy(dto: ArticlePutDTONested, updatedAt: Instant) = copy(
+        title = dto.title ?: title,
+        slug = dto.title?.slugify() ?: slug,
+        description = dto.description ?: description,
+        body = dto.body ?: body,
+        updatedAt = updatedAt
+    )
 
     @Test
     fun `when get articles expect valid response`() {
@@ -168,13 +178,6 @@ class ArticleIntegrationTest(
         return mockMvc.postArticles(author, dto)
     }
 
-    private val putDtoTestCases = listOf(
-        ArticlePutDTONested("New Article Title", null, null),
-        ArticlePutDTONested(null, "new description", null),
-        ArticlePutDTONested(null, null, "new body"),
-        ArticlePutDTONested(null, "new description with body", "new body with description"),
-    )
-
     private fun MultipleArticleModel.assertHasSize(size: Int) {
         assertThat(articles.size).isEqualTo(articlesCount).isEqualTo(size)
     }
@@ -193,58 +196,7 @@ fun createArticlePostDto(title: String, tagList: List<String> = listOf("tag1, ta
     )
 }
 
-fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO) {
-    jsonPath("article.slug", equalTo(dto.slug))
-    jsonPath("article.title", equalTo(dto.title))
-    jsonPath("article.description", equalTo(dto.description))
-    jsonPath("article.body", equalTo(dto.body))
-    jsonPath("article.tagList", equalTo(dto.tagList))
-    jsonPath("article.createdAt", matchesPattern(datePattern))
-    jsonPath("article.updatedAt", matchesPattern(datePattern))
-    jsonPath("article.favorited", equalTo(dto.favorited))
-    jsonPath("article.favoritesCount", equalTo(dto.favoritesCount))
-    jsonPath("article.author.username", equalTo(dto.author.username))
-    jsonPath("article.author.bio", equalTo(dto.author.bio))
-    jsonPath("article.author.image", equalTo(dto.author.image))
-    jsonPath("article.author.following", equalTo(dto.author.following))
-}
-
-private val datePattern =
-    Regex("^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?\$")
-        .toPattern()
-
-
 private val ArticlePostDTO.slug get() = article.title.slugify()
-
-private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticlePostDTO, author: UserDTO) {
-    ArticleDTO(
-        slug = dto.slug, title = dto.article.title,
-        description = dto.article.description, body = dto.article.body,
-        tagList = dto.article.tagList,
-        favorited = false, favoritesCount = 0,
-        createdAt = Instant.now(), updatedAt = Instant.now(),
-        author = ProfileDTO(
-            username = author.username,
-            bio = author.bio,
-            image = author.image,
-            following = false
-        )
-    ).let { validArticleDTO(it) }
-}
-
-private fun MockMvcResultMatchersDsl.validArticleDTO(dto: ArticleDTO, putDto: ArticlePutDTONested) =
-    validArticleDTO(
-        ArticleDTO(
-            title = putDto.title ?: dto.title,
-            slug = putDto.title?.slugify() ?: dto.slug,
-            description = putDto.description ?: dto.description,
-            body = putDto.body ?: dto.body,
-            tagList = dto.tagList,
-            favorited = dto.favorited, favoritesCount = dto.favoritesCount,
-            createdAt = dto.createdAt, updatedAt = dto.updatedAt,
-            author = dto.author.toProfileModel().profile,
-        )
-    )
 
 private fun ResultActionsDsl.andReturnArticleDto() = andReturnResponseBody<ArticleModel>().article
 
