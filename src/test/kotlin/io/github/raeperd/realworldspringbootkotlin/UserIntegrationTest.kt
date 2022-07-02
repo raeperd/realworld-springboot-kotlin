@@ -51,7 +51,7 @@ class UserIntegrationTest(
         mockMvc.postUsersLogin(email, password)
             .andExpect { status { isOk() } }
             .andReturnResponseBody<UserModel>().user
-            .apply { assertThat(this).isEqualTo(userDto) }
+            .apply { assertThat(this).isEqualTo(userDto.copy(token = this.token)) }
     }
 
     @Test
