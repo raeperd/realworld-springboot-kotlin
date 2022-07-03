@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin
 
-import io.github.raeperd.realworldspringbootkotlin.domain.slugify
+import io.github.raeperd.realworldspringbootkotlin.domain.article.slugify
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel

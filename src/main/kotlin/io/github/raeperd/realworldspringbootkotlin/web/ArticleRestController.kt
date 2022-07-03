@@ -1,6 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
 import io.github.raeperd.realworldspringbootkotlin.domain.*
+import io.github.raeperd.realworldspringbootkotlin.domain.article.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus.CREATED

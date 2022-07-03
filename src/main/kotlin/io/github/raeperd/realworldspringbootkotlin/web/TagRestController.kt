@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Tag
-import io.github.raeperd.realworldspringbootkotlin.domain.TagRepository
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Tag
+import io.github.raeperd.realworldspringbootkotlin.domain.article.TagRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 

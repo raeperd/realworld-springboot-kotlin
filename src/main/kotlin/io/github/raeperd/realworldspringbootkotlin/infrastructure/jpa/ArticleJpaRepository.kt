@@ -1,6 +1,10 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.*
+import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleCreateForm
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleQueryParam
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification

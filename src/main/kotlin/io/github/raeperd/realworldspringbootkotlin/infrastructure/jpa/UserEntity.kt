@@ -1,6 +1,11 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.*
+import io.github.raeperd.realworldspringbootkotlin.domain.Password
+import io.github.raeperd.realworldspringbootkotlin.domain.Profile
+import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
 import javax.persistence.*
 
 @Entity

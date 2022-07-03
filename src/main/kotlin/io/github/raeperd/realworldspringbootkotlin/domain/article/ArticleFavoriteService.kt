@@ -1,5 +1,7 @@
-package io.github.raeperd.realworldspringbootkotlin.domain
+package io.github.raeperd.realworldspringbootkotlin.domain.article
 
+import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

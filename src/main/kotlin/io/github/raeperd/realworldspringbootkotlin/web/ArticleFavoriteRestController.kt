@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleFavoriteService
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleFavoriteService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable

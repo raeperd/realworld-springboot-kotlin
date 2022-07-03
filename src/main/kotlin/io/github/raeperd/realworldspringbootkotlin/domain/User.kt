@@ -1,5 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
 import javax.persistence.Column
 import javax.persistence.Embeddable
 

@@ -1,5 +1,6 @@
-package io.github.raeperd.realworldspringbootkotlin.domain
+package io.github.raeperd.realworldspringbootkotlin.domain.article
 
+import io.github.raeperd.realworldspringbootkotlin.domain.ReadOnlyUserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

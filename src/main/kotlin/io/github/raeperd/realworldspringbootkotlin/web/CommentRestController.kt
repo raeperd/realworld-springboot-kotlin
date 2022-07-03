@@ -1,8 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.CommentCreateForm
-import io.github.raeperd.realworldspringbootkotlin.domain.CommentDTO
-import io.github.raeperd.realworldspringbootkotlin.domain.CommentService
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentService
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.*

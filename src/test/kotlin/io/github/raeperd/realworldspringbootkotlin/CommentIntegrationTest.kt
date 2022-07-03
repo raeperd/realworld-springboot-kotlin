@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin
 
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody

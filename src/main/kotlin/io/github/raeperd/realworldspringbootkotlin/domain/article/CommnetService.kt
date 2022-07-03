@@ -1,5 +1,9 @@
-package io.github.raeperd.realworldspringbootkotlin.domain
+package io.github.raeperd.realworldspringbootkotlin.domain.article
 
+import io.github.raeperd.realworldspringbootkotlin.domain.NotAuthorizedException
+import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
+import io.github.raeperd.realworldspringbootkotlin.domain.toProfileDTO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant

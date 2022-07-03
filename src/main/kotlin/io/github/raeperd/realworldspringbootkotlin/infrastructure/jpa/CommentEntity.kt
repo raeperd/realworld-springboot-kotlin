@@ -1,7 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Comment
 import io.github.raeperd.realworldspringbootkotlin.domain.User
+import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.GenerationType.IDENTITY

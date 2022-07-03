@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.ArticleQueryParam
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleQueryParam
 import org.springframework.data.jpa.domain.Specification
 import java.time.Instant
 import javax.persistence.criteria.JoinType
