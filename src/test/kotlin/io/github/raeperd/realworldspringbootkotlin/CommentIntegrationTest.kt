@@ -1,7 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin
 
 import io.github.raeperd.realworldspringbootkotlin.domain.ArticleDTO
-import io.github.raeperd.realworldspringbootkotlin.domain.CommentDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
@@ -22,10 +21,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import java.time.Instant
-import java.time.ZoneOffset
 
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
@@ -55,16 +53,37 @@ class CommentIntegrationTest(
 
         val commentDto = mockMvc.postComments(articleDto.slug, author, commentPostDto)
             .andExpect { status { isCreated() } }
-            .andReturnResponseBody<CommentModel>().comment
-            .apply { assertThatValidCommentWithBody(commentPostDto.body) }
+            .andReturnResponseBody<CommentModel>()
+            .apply {
+                assertThat(comment.body).isEqualTo(commentPostDto.body)
+                assertThat(comment.createdAt).isEqualTo(comment.updatedAt)
+            }.comment
 
         mockMvc.get("/articles/${articleDto.slug}/comments")
             .andExpect { status { isOk() } }
-            .andReturnResponseBody<MultipleCommentModel>().comments
+            .andReturnResponseBody<MultipleCommentModel>()
             .apply {
-                assertThat(this).isNotEmpty
-                this.first().assertThatIsEqualTo(commentDto)
+                assertThat(comments).isNotEmpty
+                assertThat(comments).contains(commentDto)
             }
+
+        mockMvc.delete("/articles/${articleDto.slug}/comments/${commentDto.id}")
+            .andExpect { status { isForbidden() } }
+
+        val viewer = mockMvc.postMockUser("viewer")
+        mockMvc.deleteComments(articleDto.slug, commentDto.id, viewer)
+            .andExpect { status { isForbidden() } }
+
+        mockMvc.deleteComments(articleDto.slug, commentDto.id + 2, viewer)
+            .andExpect { status { isNotFound() } }
+
+        mockMvc.deleteComments(articleDto.slug, commentDto.id, author)
+            .andExpect { status { isOk() } }
+
+        mockMvc.get("/articles/${articleDto.slug}/comments")
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>()
+            .apply { assertThat(comments).isEmpty() }
     }
 
     private fun MockMvc.postSampleArticles(): ArticleDTO {
@@ -81,29 +100,12 @@ class CommentIntegrationTest(
             content = dto.toJson()
         }
 
+    private fun MockMvc.deleteComments(slug: String, commentId: Long, author: UserDTO) =
+        delete("/articles/${slug}/comments/${commentId}") { withAuthToken(author.token) }
+
     private fun createCommentPostDto(): CommentPostDto =
         CommentPostDto(CommentPostDtoNested("Some comment"))
 
     private val CommentPostDto.body: String
         get() = comment.body
-
-    private fun CommentDTO.assertThatValidCommentWithBody(body: String) {
-        assertThat(this.body).isEqualTo(body)
-        assertThat(id).isGreaterThan(0)
-        assertThat(createdAt).isEqualTo(updatedAt)
-        assertThat(author.username).isNotBlank
-    }
-
-    private fun CommentDTO.assertThatIsEqualTo(dto: CommentDTO) {
-        assertThat(id).isEqualTo(dto.id)
-        createdAt.assertThatIsEqualToIgnoreNanos(updatedAt)
-        createdAt.assertThatIsEqualToIgnoreNanos(dto.createdAt)
-        updatedAt.assertThatIsEqualToIgnoreNanos(dto.updatedAt)
-        assertThat(body).isEqualTo(dto.body)
-        assertThat(author).isEqualTo(dto.author)
-    }
-
-    private fun Instant.assertThatIsEqualToIgnoreNanos(other: Instant) {
-        assertThat(atZone(ZoneOffset.UTC)).isEqualToIgnoringNanos(other.atZone(ZoneOffset.UTC))
-    }
 }
