@@ -123,7 +123,11 @@ class ArticleIntegrationTest(
         mockMvc.get("/articles?tag=tag2")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()
-            .apply { assertHasSize(12) }
+            .apply {
+                assertThat(articles).isNotEmpty
+                assertThat(articles.first().tagList).startsWith("tag2")
+                assertHasSize(12)
+            }
 
         val articleDto = postSampleArticle(author, listOf("tag3")).andReturnArticleDto()
         mockMvc.post("/articles/${articleDto.slug}/favorite") {
