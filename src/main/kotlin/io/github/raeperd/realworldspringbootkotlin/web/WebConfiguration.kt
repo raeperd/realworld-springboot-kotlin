@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializer
-import io.github.raeperd.realworldspringbootkotlin.web.jwt.HttpRequestMeta
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.AntRequestPattern
 import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAccessControlInterceptor
 import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationInterceptor
 import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTPayloadArgumentResolver
@@ -29,15 +29,15 @@ class WebConfiguration(
         registry.addInterceptor(JWTAuthenticationInterceptor(jwtDeserializer))
         registry.addInterceptor(
             JWTAccessControlInterceptor(
-                allowList = setOf(
-                    HttpRequestMeta(POST, "/users"),
-                    HttpRequestMeta(POST, "/users/login"),
-                    HttpRequestMeta(GET, "/profiles"),
-                    HttpRequestMeta(GET, "/articles"),
-                    HttpRequestMeta(GET, "/tags"),
+                patternsAllowed = setOf(
+                    AntRequestPattern(POST, "/users"),
+                    AntRequestPattern(POST, "/users/login"),
+                    AntRequestPattern(GET, "/profiles/**"),
+                    AntRequestPattern(GET, "/articles/**"),
+                    AntRequestPattern(GET, "/tags"),
                 ),
             )
-        )
+        ).addPathPatterns()
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {

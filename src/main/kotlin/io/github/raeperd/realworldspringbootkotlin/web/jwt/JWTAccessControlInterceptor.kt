@@ -2,14 +2,16 @@ package io.github.raeperd.realworldspringbootkotlin.web.jwt
 
 import io.github.raeperd.realworldspringbootkotlin.web.jwt.JWTAuthenticationInterceptor.Companion.JWT_AUTHENTICATION_ATTRIBUTE_NAME
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.GET
+import org.springframework.util.AntPathMatcher
 import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class JWTAccessControlInterceptor(
-    private val allowList: Set<HttpRequestMeta>
+    private val patternsAllowed: Set<AntRequestPattern>
 ) : HandlerInterceptor {
+
+    private val antRequestPatternMatcher = AntRequestPatternMatcher()
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         if (shouldNotHandle(request)) {
@@ -20,22 +22,30 @@ class JWTAccessControlInterceptor(
     }
 
     private fun shouldNotHandle(request: HttpServletRequest): Boolean {
-        return HttpRequestMeta(request)
-            .run {
-                this in allowList
-                        || (method == GET && allowList.any { it.method == GET && url.startsWith(it.url) })
-            }
+        return patternsAllowed.any { pattern -> pattern.match(request.requestMethod, request.requestURI) }
     }
+
+    private val HttpServletRequest.requestMethod: HttpMethod
+        get() = HttpMethod.resolve(method) ?: throw IllegalStateException("No such HttpMethod $method")
+
+    private fun AntRequestPattern.match(method: HttpMethod, url: String) =
+        antRequestPatternMatcher.match(this, method, url)
 }
 
 class NoJWTAuthenticationFound : RuntimeException("No JWT Authentication found")
 
-data class HttpRequestMeta(
+data class AntRequestPattern(
     val method: HttpMethod,
-    val url: String
-) {
-    constructor(request: HttpServletRequest) : this(
-        HttpMethod.resolve(request.method) ?: throw IllegalStateException("No such HttpMethod ${request.method}"),
-        request.requestURI
-    )
+    val pattern: String
+)
+
+private class AntRequestPatternMatcher {
+    private val antPathMatcher = AntPathMatcher()
+
+    fun match(pattern: AntRequestPattern, method: HttpMethod, uri: String): Boolean {
+        if (pattern.method != method) {
+            return false
+        }
+        return antPathMatcher.match(pattern.pattern, uri)
+    }
 }
