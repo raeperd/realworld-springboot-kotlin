@@ -30,51 +30,33 @@ class UserEntity(
     private val favoriteArticles: MutableSet<Long> = HashSet()
 
     override fun viewUserProfile(user: User): Profile {
-        return ProfileEntity(user.username, user.image, user.bio, followingUsers.contains(user.id))
+        return user.withFollowings(followingUsers.contains(user.id))
     }
 
     override fun followUser(userToFollow: User) {
-        if (userToFollow !is UserEntity) {
-            throw IllegalArgumentException("Expected UserEntity but given ${userToFollow.javaClass}")
-        }
         followingUsers.add(userToFollow.id)
     }
 
     override fun unfollowUser(userToUnFollow: User) {
-        if (userToUnFollow !is UserEntity) {
-            throw IllegalArgumentException("Expected UserEntity but given ${userToUnFollow.javaClass}")
-        }
         followingUsers.remove(userToUnFollow.id)
     }
 
     override fun favoriteArticle(article: Article): Boolean {
-        return checkArticleEntity(article)
-            .let { articleEntity -> favoriteArticles.add(articleEntity.id) }
+        return favoriteArticles.add(article.id)
     }
 
     override fun unfavoriteArticle(article: Article): Boolean {
-        return checkArticleEntity(article)
-            .let { articleEntity ->
-                favoriteArticles.remove(articleEntity.id)
-            }
+        return favoriteArticles.remove(article.id)
     }
 
     override fun isFavoriteArticle(article: Article): Boolean {
-        return checkArticleEntity(article)
-            .let { articleEntity -> favoriteArticles.contains(articleEntity.id) }
+        return favoriteArticles.contains(article.id)
     }
 
     override fun addComment(article: Article, form: CommentCreateForm): Comment {
         val comment = CommentEntity(form.body, this)
-        checkArticleEntity(article).addComment(comment)
+        article.addComment(comment)
         return comment
-    }
-
-    private fun checkArticleEntity(article: Article): ArticleEntity {
-        if (article !is ArticleEntity) {
-            throw IllegalArgumentException("Expected ArticleEntity but given ${article.javaClass}")
-        }
-        return article
     }
 
     override fun equals(other: Any?): Boolean {

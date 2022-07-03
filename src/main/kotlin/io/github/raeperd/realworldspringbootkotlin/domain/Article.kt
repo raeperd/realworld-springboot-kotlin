@@ -8,6 +8,7 @@ import java.time.Instant
 import java.util.*
 
 interface Article {
+    val id: Long
     val slug: String
     var title: String
     var description: String
@@ -19,6 +20,7 @@ interface Article {
     val updatedAt: Instant
     val favoritesCount: Int
     fun isWrittenBy(user: User): Boolean
+    fun addComment(comment: Comment): Boolean
     fun findCommentById(id: Long): Comment?
     fun removeComment(comment: Comment): Boolean
 

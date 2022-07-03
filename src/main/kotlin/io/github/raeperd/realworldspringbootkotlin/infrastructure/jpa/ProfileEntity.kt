@@ -21,4 +21,18 @@ class ProfileEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
+
+    override fun withFollowings(following: Boolean): Profile {
+        return ProfileEntity(username, image, bio, following)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProfileEntity) return false
+        return username != other.username
+    }
+
+    override fun hashCode(): Int {
+        return username.hashCode()
+    }
 }

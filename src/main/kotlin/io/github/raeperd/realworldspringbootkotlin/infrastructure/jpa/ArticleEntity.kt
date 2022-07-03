@@ -33,7 +33,7 @@ class ArticleEntity(
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    val id: Long = 0
+    override val id: Long = 0
 
     override var title = title
         set(value) {
@@ -67,16 +67,19 @@ class ArticleEntity(
 
     override fun isWrittenBy(user: User) = author.username == user.username
 
+    override fun addComment(comment: Comment): Boolean {
+        if (comment !is CommentEntity) {
+            throw IllegalArgumentException("Expected CommentEntity but ${comment.javaClass} found")
+        }
+        return comments.add(comment)
+    }
+
     override fun findCommentById(id: Long): Comment? {
         return comments.firstOrNull { it.id == id }
     }
 
     override fun removeComment(comment: Comment): Boolean {
         return comments.removeIf { it.id == comment.id }
-    }
-
-    fun addComment(commentEntity: CommentEntity): Boolean {
-        return comments.add(commentEntity)
     }
 
     @ElementCollection

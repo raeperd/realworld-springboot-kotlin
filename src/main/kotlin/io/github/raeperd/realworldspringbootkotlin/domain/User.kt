@@ -7,7 +7,12 @@ interface Profile {
     var username: String
     var image: String?
     var bio: String
-    var following: Boolean
+    val following: Boolean
+
+    fun withFollowings(following: Boolean): Profile
+
+    override fun equals(other: Any?): Boolean
+    override fun hashCode(): Int
 }
 
 interface User : Profile {
