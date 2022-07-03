@@ -25,6 +25,11 @@ class CommentRestController(
             .toMultipleCommentModel()
     }
 
+    @DeleteMapping("/articles/{slug}/comments/{commentId}")
+    fun deleteComments(@PathVariable slug: String, @PathVariable commentId: Long, payload: JWTPayload) {
+        commentService.deleteCommentsById(slug, payload.sub, commentId)
+    }
+
     private fun CommentDTO.toCommentModel() = CommentModel(this)
 
     private fun List<CommentDTO>.toMultipleCommentModel() = MultipleCommentModel(this)

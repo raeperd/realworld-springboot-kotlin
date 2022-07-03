@@ -19,6 +19,11 @@ interface Article {
     val updatedAt: Instant
     val favoritesCount: Int
     fun isWrittenBy(user: User): Boolean
+    fun findCommentById(id: Long): Comment?
+    fun removeComment(comment: Comment): Boolean
+
+    fun findCommentByIdOrThrow(id: Long): Comment =
+        findCommentById(id) ?: throw NoSuchElementException("No such comment with id: $id")
 }
 
 fun String.slugify(): String = normalize(this, NFD)
