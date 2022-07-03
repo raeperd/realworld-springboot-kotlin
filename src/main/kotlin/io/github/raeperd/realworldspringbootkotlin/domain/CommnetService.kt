@@ -25,6 +25,18 @@ class CommentService(
             .map { it.toDTO() }
     }
 
+    fun deleteCommentsById(slug: String, authorId: Long, commentId: Long) {
+        val author = userRepository.findUserByIdOrThrow(authorId)
+        articleRepository.findArticleBySlugOrThrow(slug)
+            .also { article ->
+                val comment = article.findCommentByIdOrThrow(commentId)
+                if (!comment.isWrittenBy(author)) {
+                    throw NotAuthorizedException("User ${author.username} is not authorized to delete comment ${commentId}")
+                }
+                article.removeComment(comment)
+            }
+    }
+
     private fun Comment.toDTO() =
         CommentDTO(id, createdAt, updatedAt, body, author.toProfileDTO())
 }

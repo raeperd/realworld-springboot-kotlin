@@ -1,9 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Article
-import io.github.raeperd.realworldspringbootkotlin.domain.Tag
-import io.github.raeperd.realworldspringbootkotlin.domain.User
-import io.github.raeperd.realworldspringbootkotlin.domain.slugify
+import io.github.raeperd.realworldspringbootkotlin.domain.*
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.FetchType.EAGER
@@ -69,6 +66,14 @@ class ArticleEntity(
     override var updatedAt: Instant = createdAt
 
     override fun isWrittenBy(user: User) = author.username == user.username
+
+    override fun findCommentById(id: Long): Comment? {
+        return comments.firstOrNull { it.id == id }
+    }
+
+    override fun removeComment(comment: Comment): Boolean {
+        return comments.removeIf { it.id == comment.id }
+    }
 
     fun addComment(commentEntity: CommentEntity): Boolean {
         return comments.add(commentEntity)

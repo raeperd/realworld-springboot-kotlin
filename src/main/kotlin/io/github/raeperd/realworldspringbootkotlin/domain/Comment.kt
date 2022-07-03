@@ -8,6 +8,7 @@ interface Comment {
     val updatedAt: Instant
     val body: String
     val author: Profile
+    fun isWrittenBy(user: User): Boolean
 }
 
 data class CommentCreateForm(
