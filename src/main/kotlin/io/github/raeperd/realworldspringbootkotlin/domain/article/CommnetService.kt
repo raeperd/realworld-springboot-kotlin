@@ -34,7 +34,7 @@ class CommentService(
         articleRepository.findArticleBySlugOrThrow(slug)
             .also { article ->
                 val comment = article.findCommentByIdOrThrow(commentId)
-                if (!comment.isWrittenBy(author)) {
+                if (!comment.isCreatedBy(author)) {
                     throw NotAuthorizedException("User ${author.username} is not authorized to delete comment ${commentId}")
                 }
                 article.removeComment(comment)

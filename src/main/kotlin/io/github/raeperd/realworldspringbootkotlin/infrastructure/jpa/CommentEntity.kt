@@ -1,6 +1,5 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
 import java.time.Instant
 import javax.persistence.*
@@ -22,8 +21,4 @@ class CommentEntity(
     override val createdAt: Instant = Instant.now(),
     override val updatedAt: Instant = createdAt,
 ) : Comment {
-
-    override fun isWrittenBy(user: User): Boolean {
-        return author.username == user.username
-    }
 }

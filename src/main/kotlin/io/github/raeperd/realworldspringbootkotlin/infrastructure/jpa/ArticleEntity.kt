@@ -1,6 +1,5 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Tag
@@ -68,8 +67,6 @@ class ArticleEntity(
 
     @Column(name = "updated_at", nullable = false)
     override var updatedAt: Instant = createdAt
-
-    override fun isWrittenBy(user: User) = author.username == user.username
 
     override fun addComment(comment: Comment): Boolean {
         if (comment !is CommentEntity) {

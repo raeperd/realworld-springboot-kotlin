@@ -1,6 +1,5 @@
 package io.github.raeperd.realworldspringbootkotlin.domain.article
 
-import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -9,7 +8,7 @@ import java.text.Normalizer.normalize
 import java.time.Instant
 import java.util.*
 
-interface Article {
+interface Article : UserCreatedContents {
     val id: Long
     val slug: String
     var title: String
@@ -17,11 +16,9 @@ interface Article {
     var body: String
     val tagList: List<Tag>
     val comments: List<Comment>
-    val author: Profile
     val createdAt: Instant
     val updatedAt: Instant
     val favoritesCount: Int
-    fun isWrittenBy(user: User): Boolean
     fun addComment(comment: Comment): Boolean
     fun findCommentById(id: Long): Comment?
     fun removeComment(comment: Comment): Boolean
