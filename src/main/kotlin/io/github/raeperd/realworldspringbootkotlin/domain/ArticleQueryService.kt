@@ -14,8 +14,8 @@ class ArticleQueryService(
     fun getArticles(pageable: Pageable, param: ArticleQueryParam, viewerId: Long? = null): Page<ArticleDTO> {
         val articles = articleRepository.getAllArticles(pageable, param)
         return viewerId?.let { id -> userRepository.findUserByIdOrThrow(id) }
-            ?.let { user -> articles.map { it.toArticleDTO(user) } }
-            ?: articles.map { it.toArticleDTO() }
+            ?.let { user -> articles.map { it.toArticleDTO(firstTag = param.tag, user = user) } }
+            ?: articles.map { it.toArticleDTO(firstTag = param.tag) }
     }
 
     fun getFeed(viewerId: Long, pageable: Pageable): Page<ArticleDTO> {

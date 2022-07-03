@@ -60,32 +60,26 @@ data class ArticleDTO(
     val favorited: Boolean
 )
 
-fun Article.toArticleDTO(user: User, favoritesCount: Int = this.favoritesCount): ArticleDTO {
+fun Article.toArticleDTO(
+    user: User? = null, favoritesCount: Int = this.favoritesCount, firstTag: String? = null
+): ArticleDTO {
     return ArticleDTO(
         slug = slug,
         title = title,
         description = description,
         body = body,
-        tagList = tagList.map { it.toString() },
         author = author.toProfileDTO(),
         createdAt = createdAt,
         updatedAt = updatedAt,
+        favorited = user?.isFavoriteArticle(this) ?: false,
         favoritesCount = favoritesCount,
-        favorited = user.isFavoriteArticle(this)
-    )
-}
-
-fun Article.toArticleDTO(): ArticleDTO {
-    return ArticleDTO(
-        slug = slug,
-        title = title,
-        description = description,
-        body = body,
-        tagList = tagList.map { it.toString() },
-        author = author.toProfileDTO(),
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-        favoritesCount = favoritesCount,
-        favorited = false
+        tagList = tagList.map { it.toString() }.toMutableList()
+            .apply {
+                val indexFound = indexOf(firstTag)
+                if (firstTag != null && -1 < indexFound) {
+                    this[indexFound] = this[0]
+                    this[0] = firstTag
+                }
+            },
     )
 }
