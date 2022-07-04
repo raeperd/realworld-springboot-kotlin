@@ -1,6 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTDeserializationException
 import io.github.raeperd.realworldspringbootkotlin.domain.NotAuthorizedException
+import io.github.raeperd.realworldspringbootkotlin.web.jwt.NoJWTAuthenticationFound
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
@@ -21,7 +23,9 @@ class RestControllerAdvice {
         when (exception) {
             is NoSuchElementException -> NOT_FOUND
             is IllegalArgumentException -> BAD_REQUEST
+            is JWTDeserializationException -> BAD_REQUEST
             is NotAuthorizedException -> FORBIDDEN
+            is NoJWTAuthenticationFound -> FORBIDDEN
             else -> INTERNAL_SERVER_ERROR
         }
 }

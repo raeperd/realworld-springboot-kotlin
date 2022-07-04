@@ -94,11 +94,12 @@ class UserIntegrationTest(
             .andExpect { status { isOk() } }
     }
 
-    private fun UserDTO.copy(putDTO: UserPutDTO) = copy(
+    private fun UserDTO.copy(putDTO: UserPutDTO, token: String? = null) = copy(
         email = putDTO.user.email ?: email,
         username = putDTO.user.username ?: username,
         bio = putDTO.user.bio ?: bio,
-        image = putDTO.user.image ?: image
+        image = putDTO.user.image ?: image,
+        token = token ?: this.token
     )
 }
 
