@@ -1,9 +1,7 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
-import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
-import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
-import io.github.raeperd.realworldspringbootkotlin.domain.article.Tag
-import io.github.raeperd.realworldspringbootkotlin.domain.article.slugify
+import io.github.raeperd.realworldspringbootkotlin.domain.article.*
+import io.github.raeperd.realworldspringbootkotlin.domain.toProfileDTO
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.FetchType.EAGER
@@ -81,6 +79,30 @@ class ArticleEntity(
 
     override fun removeComment(comment: Comment): Boolean {
         return comments.removeIf { it.id == comment.id }
+    }
+
+    override fun toDTO(following: Boolean?, firstTag: String?, favorited: Boolean?): ArticleDTO {
+        return ArticleDTO(
+            slug = slug,
+            title = title,
+            description = description,
+            body = body,
+            author = author.withFollowings(following ?: false).toProfileDTO(),
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            favorited = favorited ?: false,
+            favoritesCount = favoritesCount,
+            tagList = tagList.map { it.toString() }.toMutableList()
+                .apply {
+                    if (firstTag != null) {
+                        val indexFound = indexOf(firstTag)
+                        if (0 < indexFound) {
+                            this[indexFound] = this[0]
+                            this[0] = firstTag
+                        }
+                    }
+                },
+        )
     }
 
     @ElementCollection

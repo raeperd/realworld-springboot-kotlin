@@ -1,6 +1,5 @@
 package io.github.raeperd.realworldspringbootkotlin.domain.article
 
-import io.github.raeperd.realworldspringbootkotlin.domain.User
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,9 +16,9 @@ class ArticleFavoriteService(
         return userRepository.findUserByIdOrThrow(userId)
             .let { user ->
                 if (user.favoriteArticle(article))
-                    article.toDtoAfterFavorite(user)
+                    user.viewArticle(article).copy(favoritesCount = article.favoritesCount + 1)
                 else
-                    article.toArticleDTO(user)
+                    user.viewArticle(article)
             }
     }
 
@@ -28,12 +27,9 @@ class ArticleFavoriteService(
         return userRepository.findUserByIdOrThrow(userId)
             .let { user ->
                 if (user.unfavoriteArticle(article))
-                    article.toDtoAfterUnFavorite(user)
+                    user.viewArticle(article).copy(favoritesCount = article.favoritesCount - 1)
                 else
-                    article.toArticleDTO(user)
+                    user.viewArticle(article)
             }
     }
-
-    fun Article.toDtoAfterFavorite(user: User) = toArticleDTO(user, favoritesCount + 1)
-    fun Article.toDtoAfterUnFavorite(user: User) = toArticleDTO(user, favoritesCount - 1)
 }

@@ -19,12 +19,14 @@ interface Article : UserCreatedContents {
     val createdAt: Instant
     val updatedAt: Instant
     val favoritesCount: Int
+
     fun addComment(comment: Comment): Boolean
     fun findCommentById(id: Long): Comment?
     fun removeComment(comment: Comment): Boolean
-
     fun findCommentByIdOrThrow(id: Long): Comment =
         findCommentById(id) ?: throw NoSuchElementException("No such comment with id: $id")
+
+    fun toDTO(following: Boolean? = null, firstTag: String? = null, favorited: Boolean? = null): ArticleDTO
 }
 
 fun String.slugify(): String = normalize(this, NFD)

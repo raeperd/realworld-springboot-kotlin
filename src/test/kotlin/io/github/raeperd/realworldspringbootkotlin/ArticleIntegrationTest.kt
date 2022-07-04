@@ -105,6 +105,18 @@ class ArticleIntegrationTest(
                 assertOrderedByCreatedDate()
             }
 
+        mockMvc.post("/profiles/${author.username}/follow") { withAuthToken(anotherAuthor.token) }
+            .andExpect { status { isOk() } }
+
+        mockMvc.get("/articles") { withAuthToken(anotherAuthor.token) }
+            .andReturnMultipleArticles()
+            .apply {
+                assertThat(articles.filter { it.author.username == author.username }
+                    .all { it.author.following }).isTrue
+                assertThat(articles.filter { it.author.username != author.username }
+                    .none { it.author.following }).isTrue
+            }
+        
         mockMvc.get("/articles?limit=100")
             .andExpect { status { isOk() } }
             .andReturnMultipleArticles()

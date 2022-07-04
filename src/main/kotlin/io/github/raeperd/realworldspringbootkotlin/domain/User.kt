@@ -1,12 +1,14 @@
 package io.github.raeperd.realworldspringbootkotlin.domain
 
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
+import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
 import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
 interface Profile {
+    val id: Long
     var username: String
     var image: String?
     var bio: String
@@ -19,12 +21,13 @@ interface Profile {
 }
 
 interface User : Profile {
-    val id: Long
     var email: String
     var password: Password
-    fun viewUserProfile(user: User): Profile
-    fun followUser(userToFollow: User)
-    fun unfollowUser(userToUnFollow: User)
+    fun viewUserProfile(user: Profile): Profile
+    fun followUser(userToFollow: Profile)
+    fun unfollowUser(userToUnFollow: Profile)
+    fun isFollowing(user: Profile): Boolean
+    fun viewArticle(article: Article, firstTag: String? = null): ArticleDTO
     fun favoriteArticle(article: Article): Boolean
     fun unfavoriteArticle(article: Article): Boolean
     fun isFavoriteArticle(article: Article): Boolean

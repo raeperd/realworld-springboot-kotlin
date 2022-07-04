@@ -1,6 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.domain.article
 
-import io.github.raeperd.realworldspringbootkotlin.domain.*
+import io.github.raeperd.realworldspringbootkotlin.domain.NotAuthorizedException
+import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.ReadOnlyUserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -14,14 +16,16 @@ class ArticleService(
     fun saveNewUserArticle(authorId: Long, form: ArticleCreateForm): ArticleDTO {
         return userRepository.findUserByIdOrThrow(authorId)
             .let { author -> articleRepository.saveNewArticle(author, form) }
-            .toArticleDTO()
+            .toDTO()
     }
 
     fun findArticleBySlug(userId: Long?, slug: String): ArticleDTO {
         val article = articleRepository.findArticleBySlugOrThrow(slug)
-        return userId?.let { id -> userRepository.findUserByIdOrThrow(id) }
-            ?.let { user -> article.toArticleDTO(user) }
-            ?: article.toArticleDTO()
+        if (userId == null) {
+            return article.toDTO()
+        }
+        return userRepository.findUserByIdOrThrow(userId)
+            .viewArticle(article)
     }
 
     fun updateArticleBySlug(userId: Long, slug: String, form: ArticleUpdateForm): ArticleDTO {
@@ -35,7 +39,7 @@ class ArticleService(
             description?.let { article.description = description }
             body?.let { article.body = body }
         }
-        return articleRepository.saveArticle(article).toArticleDTO()
+        return articleRepository.saveArticle(article).toDTO()
     }
 
     fun deleteArticleBySlug(userId: Long, slug: String) {
@@ -60,27 +64,3 @@ data class ArticleDTO(
     val favoritesCount: Int,
     val favorited: Boolean
 )
-
-fun Article.toArticleDTO(
-    user: User? = null, favoritesCount: Int = this.favoritesCount, firstTag: String? = null
-): ArticleDTO {
-    return ArticleDTO(
-        slug = slug,
-        title = title,
-        description = description,
-        body = body,
-        author = author.toProfileDTO(),
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-        favorited = user?.isFavoriteArticle(this) ?: false,
-        favoritesCount = favoritesCount,
-        tagList = tagList.map { it.toString() }.toMutableList()
-            .apply {
-                val indexFound = indexOf(firstTag)
-                if (firstTag != null && -1 < indexFound) {
-                    this[indexFound] = this[0]
-                    this[0] = firstTag
-                }
-            },
-    )
-}

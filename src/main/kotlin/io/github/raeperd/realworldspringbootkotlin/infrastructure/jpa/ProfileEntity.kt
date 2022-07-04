@@ -20,8 +20,8 @@ class ProfileEntity(
 ) : Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0
-
+    override val id: Long = 0
+    
     override fun withFollowings(following: Boolean): Profile {
         return ProfileEntity(username, image, bio, following)
     }
