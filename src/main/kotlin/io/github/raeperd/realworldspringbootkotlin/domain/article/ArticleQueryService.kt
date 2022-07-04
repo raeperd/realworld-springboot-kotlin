@@ -14,16 +14,18 @@ class ArticleQueryService(
 ) {
     fun getArticles(pageable: Pageable, param: ArticleQueryParam, viewerId: Long? = null): Page<ArticleDTO> {
         val articles = articleRepository.getAllArticles(pageable, param)
-        return viewerId?.let { id -> userRepository.findUserByIdOrThrow(id) }
-            ?.let { user -> articles.map { it.toArticleDTO(firstTag = param.tag, user = user) } }
-            ?: articles.map { it.toArticleDTO(firstTag = param.tag) }
+        if (viewerId == null) {
+            return articles.map { it.toDTO(firstTag = param.tag) }
+        }
+        return userRepository.findUserByIdOrThrow(viewerId)
+            .let { viewer -> articles.map { article -> viewer.viewArticle(article, param.tag) } }
     }
 
     fun getFeed(viewerId: Long, pageable: Pageable): Page<ArticleDTO> {
         return userRepository.findUserByIdOrThrow(viewerId)
             .let { viewer ->
                 articleRepository.getFeed(pageable, viewer)
-                    .map { article -> article.toArticleDTO(viewer) }
+                    .map { article -> viewer.viewArticle(article) }
             }
     }
 }

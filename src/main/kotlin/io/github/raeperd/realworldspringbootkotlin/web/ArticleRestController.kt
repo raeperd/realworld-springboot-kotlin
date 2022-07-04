@@ -1,6 +1,6 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
-import io.github.raeperd.realworldspringbootkotlin.domain.*
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import io.github.raeperd.realworldspringbootkotlin.domain.article.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -41,7 +41,7 @@ class ArticleRestController(
 
     @GetMapping("/articles")
     fun getArticles(pageable: Pageable, param: ArticleQueryParam, payload: JWTPayload?): MultipleArticleModel {
-        return articleQueryService.getArticles(pageable, param)
+        return articleQueryService.getArticles(pageable, param, payload?.sub)
             .toMultipleArticleModel()
     }
 
