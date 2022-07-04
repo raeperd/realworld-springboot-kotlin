@@ -4,10 +4,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleDTO
 import io.github.raeperd.realworldspringbootkotlin.util.jackson.toJson
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
-import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
-import io.github.raeperd.realworldspringbootkotlin.util.spring.postArticles
-import io.github.raeperd.realworldspringbootkotlin.util.spring.postMockUser
-import io.github.raeperd.realworldspringbootkotlin.util.spring.withAuthToken
+import io.github.raeperd.realworldspringbootkotlin.util.spring.*
 import io.github.raeperd.realworldspringbootkotlin.web.ArticleModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentModel
 import io.github.raeperd.realworldspringbootkotlin.web.CommentPostDto
@@ -57,6 +54,7 @@ class CommentIntegrationTest(
             .apply {
                 assertThat(comment.body).isEqualTo(commentPostDto.body)
                 assertThat(comment.createdAt).isEqualTo(comment.updatedAt)
+                assertThat(comment.author.following).isFalse
             }.comment
 
         mockMvc.get("/articles/${articleDto.slug}/comments")
@@ -67,10 +65,20 @@ class CommentIntegrationTest(
                 assertThat(comments).contains(commentDto)
             }
 
+        val viewer = mockMvc.postMockUser("viewer")
+        mockMvc.postProfilesFollow(author.username, viewer.token)
+
+        mockMvc.get("/articles/${articleDto.slug}/comments") { withAuthToken(viewer.token) }
+            .andExpect { status { isOk() } }
+            .andReturnResponseBody<MultipleCommentModel>()
+            .apply {
+                assertThat(comments).isNotEmpty
+                assertThat(comments).contains(commentDto.copy(author = commentDto.author.copy(following = true)))
+            }
+
         mockMvc.delete("/articles/${articleDto.slug}/comments/${commentDto.id}")
             .andExpect { status { isForbidden() } }
 
-        val viewer = mockMvc.postMockUser("viewer")
         mockMvc.deleteComments(articleDto.slug, commentDto.id, viewer)
             .andExpect { status { isForbidden() } }
 

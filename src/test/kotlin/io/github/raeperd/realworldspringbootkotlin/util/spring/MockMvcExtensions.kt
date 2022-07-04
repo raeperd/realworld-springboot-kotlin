@@ -78,3 +78,9 @@ fun MockMvc.putUser(token: String, dto: UserPutDTO): ResultActionsDsl {
         accept = APPLICATION_JSON
     }
 }
+
+fun MockMvc.postProfilesFollow(celebName: String, viewerToken: String): ResultActionsDsl {
+    return post("/profiles/${celebName}/follow") {
+        withAuthToken(viewerToken)
+    }
+}
