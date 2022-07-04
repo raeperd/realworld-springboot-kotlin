@@ -68,7 +68,7 @@ tasks.jacocoTestCoverageVerification {
 
             limit {
                 value = "COVEREDRATIO"
-                minimum = "0.60".toBigDecimal()
+                minimum = "0.90".toBigDecimal()
             }
 
             excludes = listOf("io.github.raeperd.realworldspringbootkotlin")
