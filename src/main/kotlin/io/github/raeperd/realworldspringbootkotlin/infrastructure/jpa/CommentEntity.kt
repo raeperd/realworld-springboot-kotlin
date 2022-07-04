@@ -1,6 +1,8 @@
 package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 
 import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
+import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentDTO
+import io.github.raeperd.realworldspringbootkotlin.domain.toProfileDTO
 import java.time.Instant
 import javax.persistence.*
 import javax.persistence.GenerationType.IDENTITY
@@ -21,4 +23,8 @@ class CommentEntity(
     override val createdAt: Instant = Instant.now(),
     override val updatedAt: Instant = createdAt,
 ) : Comment {
+
+    override fun toDTO(following: Boolean): CommentDTO {
+        return CommentDTO(id, createdAt, updatedAt, body, author.withFollowings(following).toProfileDTO())
+    }
 }

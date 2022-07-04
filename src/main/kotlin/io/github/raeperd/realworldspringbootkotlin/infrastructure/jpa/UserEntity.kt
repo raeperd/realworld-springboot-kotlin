@@ -3,10 +3,7 @@ package io.github.raeperd.realworldspringbootkotlin.infrastructure.jpa
 import io.github.raeperd.realworldspringbootkotlin.domain.Password
 import io.github.raeperd.realworldspringbootkotlin.domain.Profile
 import io.github.raeperd.realworldspringbootkotlin.domain.User
-import io.github.raeperd.realworldspringbootkotlin.domain.article.Article
-import io.github.raeperd.realworldspringbootkotlin.domain.article.ArticleDTO
-import io.github.raeperd.realworldspringbootkotlin.domain.article.Comment
-import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
+import io.github.raeperd.realworldspringbootkotlin.domain.article.*
 import javax.persistence.*
 
 @Entity
@@ -69,6 +66,10 @@ class UserEntity(
 
     override fun isFavoriteArticle(article: Article): Boolean {
         return favoriteArticles.contains(article.id)
+    }
+
+    override fun viewComment(comment: Comment): CommentDTO {
+        return comment.toDTO(following = isFollowing(comment.author))
     }
 
     override fun addComment(article: Article, form: CommentCreateForm): Comment {

@@ -7,6 +7,8 @@ interface Comment : UserCreatedContents {
     val createdAt: Instant
     val updatedAt: Instant
     val body: String
+
+    fun toDTO(following: Boolean = false): CommentDTO
 }
 
 data class CommentCreateForm(
