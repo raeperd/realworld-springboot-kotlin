@@ -4,6 +4,7 @@ import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserDTO
 import io.github.raeperd.realworldspringbootkotlin.util.junit.JpaDatabaseCleanerExtension
 import io.github.raeperd.realworldspringbootkotlin.util.spring.andReturnResponseBody
+import io.github.raeperd.realworldspringbootkotlin.util.spring.postProfilesFollow
 import io.github.raeperd.realworldspringbootkotlin.util.spring.postUsers
 import io.github.raeperd.realworldspringbootkotlin.util.spring.withAuthToken
 import io.github.raeperd.realworldspringbootkotlin.web.ErrorResponseDTO
@@ -18,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
 
 @ExtendWith(JpaDatabaseCleanerExtension::class)
 @AutoConfigureMockMvc
@@ -60,9 +60,8 @@ class ProfileIntegrationTest(
             .andReturnResponseBody<ProfileModel>()
             .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = false)) }
 
-        mockMvc.post("/profiles/${celebProfile.username}/follow") {
-            withAuthToken(user.token)
-        }.andExpect { status { isOk() } }
+        mockMvc.postProfilesFollow(celebProfile.username, user.token)
+            .andExpect { status { isOk() } }
             .andReturnResponseBody<ProfileModel>()
             .apply { assertThat(profile).isEqualTo(celebProfile.copy(following = true)) }
 

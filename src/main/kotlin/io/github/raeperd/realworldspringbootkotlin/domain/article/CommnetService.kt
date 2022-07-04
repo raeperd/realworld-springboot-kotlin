@@ -3,7 +3,6 @@ package io.github.raeperd.realworldspringbootkotlin.domain.article
 import io.github.raeperd.realworldspringbootkotlin.domain.NotAuthorizedException
 import io.github.raeperd.realworldspringbootkotlin.domain.ProfileDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.UserRepository
-import io.github.raeperd.realworldspringbootkotlin.domain.toProfileDTO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -24,9 +23,13 @@ class CommentService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllComments(slug: String): List<CommentDTO> {
-        return articleRepository.findArticleBySlugOrThrow(slug).comments
-            .map { it.toDTO() }
+    fun getAllComments(slug: String, viewerId: Long?): List<CommentDTO> {
+        val comments = articleRepository.findArticleBySlugOrThrow(slug).comments
+        if (viewerId == null) {
+            return comments.map { it.toDTO() }
+        }
+        return userRepository.findUserByIdOrThrow(viewerId)
+            .let { viewer -> comments.map { comment -> viewer.viewComment(comment) } }
     }
 
     fun deleteCommentsById(slug: String, authorId: Long, commentId: Long) {
@@ -40,9 +43,6 @@ class CommentService(
                 article.removeComment(comment)
             }
     }
-
-    private fun Comment.toDTO() =
-        CommentDTO(id, createdAt, updatedAt, body, author.toProfileDTO())
 }
 
 data class CommentDTO(

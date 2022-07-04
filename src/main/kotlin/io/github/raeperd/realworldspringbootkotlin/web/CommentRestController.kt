@@ -1,9 +1,9 @@
 package io.github.raeperd.realworldspringbootkotlin.web
 
+import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentCreateForm
 import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentDTO
 import io.github.raeperd.realworldspringbootkotlin.domain.article.CommentService
-import io.github.raeperd.realworldspringbootkotlin.domain.JWTPayload
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.*
 
@@ -20,8 +20,8 @@ class CommentRestController(
     }
 
     @GetMapping("/articles/{slug}/comments")
-    fun getComments(@PathVariable slug: String): MultipleCommentModel {
-        return commentService.getAllComments(slug)
+    fun getComments(@PathVariable slug: String, payload: JWTPayload?): MultipleCommentModel {
+        return commentService.getAllComments(slug, payload?.sub)
             .toMultipleCommentModel()
     }
 
